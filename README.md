@@ -1,6 +1,7 @@
 # Rex::Text
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rex/text`. To experiment with that code, run `bin/console` for an interactive prompt.
+This is the Ruby Exploitation(rex) library for text generation and manipulation. It provides many different options for generating randomzied text or altering existing text. It is based entirely off of
+the work originally created inside Metasploit Framework itself.
 
 TODO: Delete this and the text above, and describe your gem
 
@@ -32,5 +33,5 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rex-text. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/rapid7/rex-text. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the code of conduct found in CODE_OF_CONDUCT.md.
 
