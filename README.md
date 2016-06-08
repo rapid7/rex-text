@@ -3,7 +3,6 @@
 This is the Ruby Exploitation(rex) library for text generation and manipulation. It provides many different options for generating randomzied text or altering existing text. It is based entirely off of
 the work originally created inside Metasploit Framework itself.
 
-TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
@@ -20,10 +19,6 @@ And then execute:
 Or install it yourself as:
 
     $ gem install rex-text
-
-## Usage
-
-TODO: Write usage instructions here
 
 ## Development
 
