@@ -25,6 +25,10 @@ require 'rex/text/ebcdic'
 require 'rex/text/pattern'
 require 'rex/text/badchars'
 
+require 'rex/text/color'
+require 'rex/text/table'
+
+
 module Rex
 
 ###
