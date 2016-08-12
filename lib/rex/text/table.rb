@@ -243,7 +243,7 @@ class Table
     begin
       IPAddr.new value
       true
-    rescue IPAddr::InvalidAddressError
+    rescue IPAddr::Error
       false
     end
   end
