@@ -47,13 +47,13 @@ module Rex
       return '' if not str
       case type
         when 'utf-16le'
-          return str.unpack('C*').pack('v*')
+          return str.unpack('U*').pack('v*')
         when 'utf-16be'
-          return str.unpack('C*').pack('n*')
+          return str.unpack('U*').pack('n*')
         when 'utf-32le'
-          return str.unpack('C*').pack('V*')
+          return str.unpack('U*').pack('V*')
         when 'utf-32be'
-          return str.unpack('C*').pack('N*')
+          return str.unpack('U*').pack('N*')
         when 'utf-7'
           case mode
             when 'all'
@@ -252,13 +252,13 @@ module Rex
       return '' if not str
       case type
         when 'utf-16le'
-          return str.unpack('v*').pack('C*')
+          return str.unpack('v*').pack('U*')
         when 'utf-16be'
-          return str.unpack('n*').pack('C*')
+          return str.unpack('n*').pack('U*')
         when 'utf-32le'
-          return str.unpack('V*').pack('C*')
+          return str.unpack('V*').pack('U*')
         when 'utf-32be'
-          return str.unpack('N*').pack('C*')
+          return str.unpack('N*').pack('U*')
         when 'utf-7'
           raise TypeError, 'invalid utf type, not yet implemented'
         when 'utf-8'
