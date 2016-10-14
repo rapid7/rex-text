@@ -1,4 +1,3 @@
-# -*- coding: binary -*-
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -112,6 +111,11 @@ module Rex
     # @see to_hex Converts all the chars
     #
     def self.ascii_safe_hex(str, whitespace=false)
+      # This sanitization is terrible and breaks everything if it finds unicode.
+      # ~4 Billion can't be wrong; long-term, this should be removed.
+      if str.encoding == (::Encoding::UTF_8)
+        return str
+      end
       if whitespace
         str.gsub(/([\x00-\x20\x80-\xFF])/n){ |x| "\\x%.2x" % x.unpack("C*")[0] }
       else
