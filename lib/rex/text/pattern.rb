@@ -33,14 +33,7 @@ module Rex
       sets.length.times { offsets << 0 }
 
       until buf.length >= length
-        begin
           buf << converge_sets(sets, 0, offsets, length)
-        end
-      end
-
-      # Maximum permutations reached, but we need more data
-      if (buf.length < length)
-        buf = buf * (length / buf.length.to_f).ceil
       end
 
       buf[0,length]
