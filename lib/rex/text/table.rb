@@ -400,7 +400,14 @@ protected
     # Ensure we pad the minimum required amount
     max = colprops[colidx]['MaxChar'] || colprops[colidx]['MaxWidth']
     max = colprops[colidx]['MaxWidth'] if max.to_i > colprops[colidx]['MaxWidth'].to_i
-    remainder = max - buf.length
+
+    encoding = buf.encoding.name
+    if not ["UTF-8", "ASCII-8BIT", "US-ASCII"].include? encoding
+      warn '**WARNING** In file #{__FILE__}::pad : String with unsupported encoding caught!'
+    end
+    utf8_buf = buf.dup.force_encoding("UTF-8")
+
+    remainder = max - utf8_buf.length
     remainder = 0 if remainder < 0
     val       = chr * remainder
 
