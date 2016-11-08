@@ -398,15 +398,15 @@ protected
   #
   def pad(chr, buf, colidx, use_cell_pad = true) # :nodoc:
     # Ensure we pad the minimum required amount
+    buf.force_encoding("UTF-16LE")
     max = colprops[colidx]['MaxChar'] || colprops[colidx]['MaxWidth']
     max = colprops[colidx]['MaxWidth'] if max.to_i > colprops[colidx]['MaxWidth'].to_i
-
     encoding = buf.encoding.name
     if not ["UTF-8", "ASCII-8BIT", "US-ASCII"].include? encoding
-      warn '**WARNING** In file #{__FILE__}::pad : String with unsupported encoding caught!'
+      warn '**WARNING** In file ' << __FILE__ << '::' <<\
+        __method__.to_s << ': String with unsupported encoding caught!'
     end
     utf8_buf = buf.dup.force_encoding("UTF-8")
-
     remainder = max - utf8_buf.length
     remainder = 0 if remainder < 0
     val       = chr * remainder
