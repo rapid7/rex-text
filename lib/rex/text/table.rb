@@ -398,7 +398,6 @@ protected
   #
   def pad(chr, buf, colidx, use_cell_pad = true) # :nodoc:
     # Ensure we pad the minimum required amount
-    buf.force_encoding("UTF-16LE")
     max = colprops[colidx]['MaxChar'] || colprops[colidx]['MaxWidth']
     max = colprops[colidx]['MaxWidth'] if max.to_i > colprops[colidx]['MaxWidth'].to_i
     encoding = buf.encoding.name
