@@ -140,7 +140,7 @@ module Rex
     def self.converge_sets(sets, idx, offsets, length) # :nodoc:
       buf = sets[idx][offsets[idx]].chr
 
-      # If there are more sets after use, converage with them.
+      # If there are more sets after use, converge with them.
       if (sets[idx + 1])
         buf << converge_sets(sets, idx + 1, offsets, length)
       else
