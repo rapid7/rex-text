@@ -7,31 +7,31 @@ module Rex
     # without hanging the underlying calls that we historically rely upon.
 
     # @param str [String] Data to checksum
-    # @return [Fixnum] 8-bit checksum
+    # @return [Integer] 8-bit checksum
     def self.checksum8(str)
       (str.unpack("C*").inject(:+) || 0) % 0x100
     end
 
     # @param str [String] Little-endian data to checksum
-    # @return [Fixnum] 16-bit checksum
+    # @return [Integer] 16-bit checksum
     def self.checksum16_le(str)
       (str.unpack("v*").inject(:+) || 0) % 0x10000
     end
 
     # @param str [String] Big-endian data to checksum
-    # @return [Fixnum] 16-bit checksum
+    # @return [Integer] 16-bit checksum
     def self.checksum16_be(str)
       (str.unpack("n*").inject(:+) || 0) % 0x10000
     end
 
     # @param str [String] Little-endian data to checksum
-    # @return [Fixnum] 32-bit checksum
+    # @return [Integer] 32-bit checksum
     def self.checksum32_le(str)
       (str.unpack("V*").inject(:+) || 0) % 0x100000000
     end
 
     # @param str [String] Big-endian data to checksum
-    # @return [Fixnum] 32-bit checksum
+    # @return [Integer] 32-bit checksum
     def self.checksum32_be(str)
       (str.unpack("N*").inject(:+) || 0) % 0x100000000
     end

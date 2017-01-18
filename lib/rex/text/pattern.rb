@@ -12,7 +12,7 @@ module Rex
     # supplied number of identifiable characters (slots).  The supplied sets
     # should not contain any duplicate characters or the logic will fail.
     #
-    # @param length [Fixnum]
+    # @param length [Integer]
     # @param sets [Array<(String,String,String)>] The character sets to choose
     #   from. Should have 3 elements, each of which must be a string containing
     #   no characters contained in the other sets.
@@ -66,14 +66,14 @@ module Rex
     #
     # @param pattern [String] The pattern to search. Usually the return value
     #   from {.pattern_create}
-    # @param value [String,Fixnum,Bignum]
-    # @return [Fixnum] Index of the given +value+ within +pattern+, if it exists
+    # @param value [String,Integer]
+    # @return [Integer] Index of the given +value+ within +pattern+, if it exists
     # @return [nil] if +pattern+ does not contain +value+
     # @see pattern_create
     def self.pattern_offset(pattern, value, start=0)
-      if (value.kind_of?(String))
+      if value.kind_of?(String)
         pattern.index(value, start)
-      elsif (value.kind_of?(Fixnum) or value.kind_of?(Bignum))
+      elsif value.kind_of?(Integer)
         pattern.index([ value ].pack('V'), start)
       else
         raise ::ArgumentError, "Invalid class for value: #{value.class}"

@@ -12,7 +12,7 @@ module Rex
     #
     # @param data [String] The string to check for bad characters
     # @param badchars [String] A list of characters considered to be bad
-    # @return [Fixnum] Index of the first bad character if any exist in +data+
+    # @return [Integer] Index of the first bad character if any exist in +data+
     # @return [nil] If +data+ contains no bad characters
     def self.badchar_index(data, badchars = '')
       badchars.unpack("C*").each { |badchar|

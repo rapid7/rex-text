@@ -13,7 +13,7 @@ module Rex
     #
     # @param str (see to_octal)
     # @param prefix (see to_octal)
-    # @param count [Fixnum] Number of bytes to put in each escape chunk
+    # @param count [Integer] Number of bytes to put in each escape chunk
     # @return [String] The escaped hex version of +str+
     def self.to_hex(str, prefix = "\\x", count = 1)
       raise ::RuntimeError, "unable to chunk into #{count} byte chunks" if ((str.length % count) > 0)
@@ -49,8 +49,8 @@ module Rex
     # Converts a string to a nicely formatted hex dump
     #
     # @param str [String] The string to convert
-    # @param width [Fixnum] Number of bytes to convert before adding a newline
-    # @param base [Fixnum] The base address of the dump
+    # @param width [Integer] Number of bytes to convert before adding a newline
+    # @param base [Integer] The base address of the dump
     def self.to_hex_dump(str, width=16, base=nil)
       buf = ''
       idx = 0

@@ -38,7 +38,7 @@ module Rex
     # Compresses a string using zlib
     #
     # @param str [String] The string to be compressed
-    # @param level [Fixnum] One of the Zlib compression level constants
+    # @param level [Integer] One of the Zlib compression level constants
     # @return [String] The compressed version of +str+
     def self.zlib_deflate(str, level = Zlib::BEST_COMPRESSION)
       if self.zlib_present?
@@ -72,7 +72,7 @@ module Rex
     # Compresses a string using gzip
     #
     # @param str (see zlib_deflate)
-    # @param level [Fixnum] Compression level, 1 (fast) to 9 (best)
+    # @param level [Integer] Compression level, 1 (fast) to 9 (best)
     # @return (see zlib_deflate)
     def self.gzip(str, level = 9)
       raise RuntimeError, "Gzip support is not present." if (!zlib_present?)

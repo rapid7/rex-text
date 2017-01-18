@@ -23,7 +23,7 @@ module Rex
     #
     # Calculate the ROR13 hash of a given string
     #
-    # @return [Fixnum]
+    # @return [Integer]
     def self.ror13_hash(name)
       hash = 0
       name.unpack("C*").each {|c| hash = ror(hash, 13); hash += c }

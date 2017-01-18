@@ -20,7 +20,7 @@ module Rex
     #                      ||     ||
     #
     # @param text [String] The string to cowsay
-    # @param width [Fixnum] Width of the cow's cloud.  Default's to cowsay(1)'s default, 39.
+    # @param width [Integer] Width of the cow's cloud.  Default's to cowsay(1)'s default, 39.
     def self.cowsay(text, width=39)
       # cowsay(1) chunks a message up into 39-byte chunks and wraps it in '| ' and ' |'
       # Rex::Text.wordwrap(text, 0, 39, ' |', '| ') almost does this, but won't

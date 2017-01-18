@@ -73,8 +73,8 @@ module Rex
     #
     # Rotate a 32-bit value to the right by +cnt+ bits
     #
-    # @param val [Fixnum] The value to rotate
-    # @param cnt [Fixnum] Number of bits to rotate by
+    # @param val [Integer] The value to rotate
+    # @param cnt [Integer] Number of bits to rotate by
     def self.ror(val, cnt)
       bits = [val].pack("N").unpack("B32")[0].split(//)
       1.upto(cnt) do |c|
