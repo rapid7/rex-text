@@ -205,6 +205,8 @@ class Table
         cmp = -1
       elsif !(a[index].kind_of?(IPAddr) || b[index].kind_of?(IPAddr)) && (valid_ip?(a[index]) && valid_ip?(b[index]))
         cmp = IPAddr.new(a[index]) <=> IPAddr.new(b[index])
+        # comparing IPv4 with IPv6 results in nil, and doesn't make sense anyway, so fudge it
+        cmp ||= 0
       else
         cmp = a[index] <=> b[index] # assumes otherwise comparable.
       end
