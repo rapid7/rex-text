@@ -184,6 +184,18 @@ class Table
     rows << fields
   end
 
+  def ip_cmp(a, b)
+    begin
+      a = IPAddr.new(a.to_s)
+      b = IPAddr.new(b.to_s)
+      return 1  if a.ipv6? && b.ipv4?
+      return -1 if a.ipv4? && b.ipv6?
+      a <=> b
+    rescue IPAddr::Error
+      nil
+    end
+  end
+
   #
   # Sorts the rows based on the supplied index of sub-arrays
   # If the supplied index is an IPv4 address, handle it differently, but
@@ -199,17 +211,11 @@ class Table
         cmp = 1
       elsif a[index] =~ /^[0-9]+$/ and b[index] =~ /^[0-9]+$/
         cmp = a[index].to_i <=> b[index].to_i
-      elsif a[index].kind_of?(IPAddr) && a[index].kind_of?(IPAddr) && a[index].ipv6? && b[index].ipv4?
-        cmp = 1
-      elsif a[index].kind_of?(IPAddr) && b[index].kind_of?(IPAddr) && a[index].ipv4? && b[index].ipv6?
-        cmp = -1
-      elsif !(a[index].kind_of?(IPAddr) || b[index].kind_of?(IPAddr)) && (valid_ip?(a[index]) && valid_ip?(b[index]))
-        cmp = IPAddr.new(a[index]) <=> IPAddr.new(b[index])
-        # comparing IPv4 with IPv6 results in nil, and doesn't make sense anyway, so fudge it
-        cmp ||= 0
+      elsif (cmp = ip_cmp(a[index], b[index])) != nil
       else
         cmp = a[index] <=> b[index] # assumes otherwise comparable.
       end
+      cmp ||= 0
       order == :forward ? cmp : -cmp
     end
   end
