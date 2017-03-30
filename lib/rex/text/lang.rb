@@ -125,7 +125,7 @@ module Rex
 
       code  = str.unpack('C*')
       buff = "#{name} = Array("
-      maxbytes = 20
+      maxbytes = 80
 
       1.upto(code.length) do |idx|
         buff << code[idx].to_s
