@@ -13,10 +13,10 @@ module Rex
     # @param fun [String] The name of the function.
     #
     # @return [String] The hash of the mod/fun pair in string format
-    def self.block_api_hash(mod, fun)
+    def self.block_api_hash(mod, func)
       unicode_mod = (mod.upcase + "\x00").unpack('C*').pack('v*')
       mod_hash = self.ror13_hash(unicode_mod)
-      fun_hash = self.ror13_hash(fun + "\x00")
+      fun_hash = self.ror13_hash(func + "\x00")
       "0x#{(mod_hash + fun_hash & 0xFFFFFFFF).to_s(16)}"
     end
 
