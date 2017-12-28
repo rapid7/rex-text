@@ -13,6 +13,29 @@ module Rex
               "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH",
               "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA",
               "WI", "WV", "WY"]
+
+    Countries = ["AF", "AX", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM",
+                 "AW", "AC", "AU", "AT", "AZ", "BS", "BH", "BB", "BD", "BY", "BE", "BZ",
+                 "BJ", "BM", "BT", "BW", "BO", "BA", "BV", "BR", "IO", "BN", "BG", "BF",
+                 "BI", "KH", "CM", "CA", "CV", "KY", "CF", "TD", "CL", "CN", "CX", "CC",
+                 "CO", "KM", "CG", "CD", "CK", "CR", "CI", "HR", "CU", "CY", "CZ", "CS",
+                 "DK", "DJ", "DM", "DO", "TP", "EC", "EG", "SV", "GQ", "ER", "EE", "ET",
+                 "FK", "FO", "FJ", "FI", "FR", "FX", "GF", "PF", "TF", "MK", "GA", "GM",
+                 "GE", "DE", "GH", "GI", "GB", "GR", "GL", "GD", "GP", "GU", "GT", "GN",
+                 "GY", "HT", "HM", "HN", "HK", "HU", "IS", "IN", "ID", "IR", "IQ", "IE",
+                 "IL", "IM", "IT", "JE", "JM", "JP", "JO", "KZ", "KE", "KI", "KP", "KR",
+                 "KW", "KG", "LA", "LV", "LB", "LI", "LR", "LY", "LS", "LT", "LU", "MO",
+                 "MG", "MW", "MY", "MV", "ML", "MT", "MH", "MQ", "MR", "MU", "YT", "MX",
+                 "FM", "MD", "MC", "ME", "MS", "MA", "MZ", "MM", "NA", "NR", "NP", "NL",
+                 "AN", "NT", "NC", "NZ", "NI", "NE", "NG", "NU", "NF", "MP", "NO", "OM",
+                 "PK", "PW", "PS", "PA", "PG", "PY", "PE", "PH", "PN", "PL", "PT", "PR",
+                 "QA", "RE", "RO", "RU", "RW", "GS", "KN", "LC", "VC", "WS", "SM", "ST",
+                 "SA", "SN", "RS", "SC", "SL", "SG", "SI", "SK", "SB", "SO", "ZA", "ES",
+                 "LK", "SH", "PM", "SD", "SR", "SJ", "SZ", "SE", "CH", "SY", "TW", "TJ",
+                 "TZ", "TH", "TG", "TK", "TO", "TT", "TN", "TR", "TM", "TC", "TV", "UG",
+                 "UA", "AE", "UK", "US", "UM", "UY", "SU", "UZ", "VU", "VA", "VE", "VN",
+                 "VG", "VI", "WF", "EH", "YE", "YU", "ZM", "ZW"]
+
     #
     # Most 100 common surnames, male/female names in the U.S. (http://names.mongabay.com/)
     #
@@ -189,6 +212,11 @@ module Rex
       }
       host.push(TLDs.sample)
       host.join('.').downcase
+    end
+
+    # Generate a country code
+    def self.rand_country
+      Countries.sample
     end
 
     # Generate a state
