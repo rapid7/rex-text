@@ -103,6 +103,7 @@ module Rex
       cset = (foo.join.unpack("C*") - bad.to_s.unpack("C*")).uniq
       return "" if cset.length == 0
       outp = []
+      (len = len.to_a.sample) if len.kind_of?(Range)
       len.times { outp << cset[rand(cset.length)] }
       outp.pack("C*")
     end
