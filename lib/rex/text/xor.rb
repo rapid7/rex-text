@@ -4,6 +4,11 @@ module Rex
   module Text
 
     def self.xor(key, value)
+      xor_key = key.to_i(16)
+      unless xor_key.between?(0, 255)
+        raise ArgumentError, 'XOR key should be between 0x00 to 0x0f'
+      end
+
       buf = ''
 
       value.each_byte do |byte|
