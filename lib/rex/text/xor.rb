@@ -4,14 +4,12 @@ module Rex
   module Text
 
     def self.xor(key, value)
-      if key.length != 1
-        raise RuntimeError, 'The key for XOR should be one byte'
-      end
-
       buf = ''
 
-      value.each do |byte|
-        buf << byte ^ key
+      value.each_byte do |byte|
+        xor_byte = byte ^ key
+        xor_byte = [xor_byte].pack('c').first
+        buf << xor_byte
       end
 
       buf
