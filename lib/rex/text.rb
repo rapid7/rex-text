@@ -24,6 +24,7 @@ require 'rex/text/block_api'
 require 'rex/text/ebcdic'
 require 'rex/text/pattern'
 require 'rex/text/badchars'
+require 'rex/text/aes256'
 
 require 'rex/text/color'
 require 'rex/text/table'
