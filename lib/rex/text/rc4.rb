@@ -3,6 +3,10 @@
 module Rex
   module Text
 
+    # Returns a decrypted or encrypted RC4 string.
+    #
+    # @param key [String] Secret key.
+    # @param [String]
     def self.rc4(key, value)
       rc4 = RC4.new(key)
 

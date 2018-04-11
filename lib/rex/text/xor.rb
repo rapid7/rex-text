@@ -3,6 +3,11 @@
 module Rex
   module Text
 
+    # Returns a XOR'd string.
+    #
+    # @param key [String] XOR key.
+    # @param value [String] The string to XOR.
+    # @return [String] An XOR'd string.
     def self.xor(key, value)
       xor_key = key.kind_of?(Integer) || key.nil? ? key.to_i : key.to_i(16)
       unless xor_key.between?(0, 255)
