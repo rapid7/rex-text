@@ -3,8 +3,10 @@
 module Rex
   module Text
 
-    def self.encrypt_rc4(key, value)
+    def self.rc4(key, value)
       rc4 = RC4.new(key)
+
+      # This can also be used to decrypt
       rc4.encrypt(value)
     end
 
