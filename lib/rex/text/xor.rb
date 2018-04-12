@@ -18,8 +18,7 @@ module Rex
 
       value.each_byte do |byte|
         xor_byte = byte ^ xor_key
-        xor_byte = [xor_byte].pack('c').first
-        buf << xor_byte
+        buf << [xor_byte].pack('c')
       end
 
       buf
