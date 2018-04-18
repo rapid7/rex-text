@@ -6,7 +6,6 @@ require 'stringio'
 require 'cgi'
 require 'zlib'
 require 'openssl'
-require 'rc4'
 
 require 'rex/text/illegal_sequence'
 require 'rex/text/rand'
