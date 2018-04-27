@@ -172,15 +172,15 @@ class Table
     if fields.length != self.columns.length
       raise RuntimeError, 'Invalid number of columns!'
     end
-    fields.each_with_index { |field, idx|
-      # Remove whitespace and ensure String format
-      field = field.to_s.strip
-      if (colprops[idx]['MaxWidth'] < field.to_s.length)
+    index = 0
+    while index < fields.size
+      field = fields[index].to_s.strip
+      if (colprops[idx]['MaxWidth'] < field.length)
         old = colprops[idx]['MaxWidth']
-        colprops[idx]['MaxWidth'] = field.to_s.length
+        colprops[idx]['MaxWidth'] = field.length
       end
-    }
-
+      index += 1
+    end
     rows << fields
   end
 
