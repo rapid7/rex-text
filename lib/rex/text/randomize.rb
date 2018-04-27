@@ -90,7 +90,7 @@ module Rex
       len = arr.length
       max = len - 1
       cyc = [* (0..max) ]
-      for d in cyc
+      cyc.each do |d|
         e = rand(d+1)
         next if e == d
         f = arr[d];
