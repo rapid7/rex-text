@@ -35,18 +35,14 @@ module Rex
     # @return [Array<String>]
     # @see permute_case
     def self.to_mixed_case_array(str)
-      letters = []
-      str.scan(/./).each { |l| letters << [l.downcase, l.upcase] }
-      coords = []
-      (1 << str.size).times { |i| coords << ("%0#{str.size}b" % i) }
-      mixed = []
-      coords.each do |coord|
-        c = coord.scan(/./).map {|x| x.to_i}
+      letters = str.each_char.map { |l| [l.downcase, l.upcase] }
+      (1 << str.size).times.map do |i| 
         this_str = ""
-        c.each_with_index { |d,i| this_str << letters[i][d] }
-        mixed << this_str
-      end
-      return mixed.uniq
+        ("%0#{str.size}b" % i).each_char.map(&:to_i).each_with_index do |d,i|
+          this_str << letters[i][d]
+        end
+        this_str
+      end.uniq
     end
 
     #
