@@ -387,21 +387,24 @@ protected
     line = ' ' * indent
     last_cell = nil
     last_idx = nil
-    row.each_with_index { |cell, idx|
-      if (idx != 0)
+    
+    index = 0
+    while index < rows.size
+      cell = rows[index]
+      if (index != 0)
         line << pad(' ', last_cell.to_s, last_idx)
       end
       # Limit wide cells
-      if colprops[idx]['MaxChar']
-        last_cell = cell.to_s[0..colprops[idx]['MaxChar'].to_i]
+      if colprops[index]['MaxChar']
+        last_cell = cell.to_s[0..colprops[index]['MaxChar'].to_i]
         line << last_cell
       else
         line << cell.to_s
         last_cell = cell
       end
-      last_idx = idx
-    }
-
+      last_idx = index 
+      index += 1
+    end
     return line + "\n"
   end
 
