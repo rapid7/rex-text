@@ -43,7 +43,11 @@ module Rex
       coords.each do |coord|
         c = coord.scan(/./).map {|x| x.to_i}
         this_str = ""
-        c.each_with_index { |d,i| this_str << letters[i][d] }
+        index = 0
+        while index < c.size
+          this_str << letters[c[index]][index]
+          index += 1
+        end
         mixed << this_str
       end
       return mixed.uniq
