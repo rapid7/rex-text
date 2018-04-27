@@ -97,7 +97,7 @@ module Rex
 
                 i = 0
                 byte = 0
-                bin.reverse.each { |bit|
+                bin.reverse_each { |bit|
                   if i < 6
                     mod = (((size * 8) - 1) - byte * 8) - i
                     out[mod] = bit
