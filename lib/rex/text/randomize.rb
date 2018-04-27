@@ -43,7 +43,11 @@ module Rex
       coords.each do |coord|
         c = coord.scan(/./).map {|x| x.to_i}
         this_str = ""
-        c.each_with_index { |d,i| this_str << letters[i][d] }
+        index = 0
+        while index < c.size
+          this_str << letters[index][c[index]]
+          index += 1
+        end
         mixed << this_str
       end
       return mixed.uniq
@@ -86,7 +90,7 @@ module Rex
       len = arr.length
       max = len - 1
       cyc = [* (0..max) ]
-      for d in cyc
+      cyc.each do |d|
         e = rand(d+1)
         next if e == d
         f = arr[d];

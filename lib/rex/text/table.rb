@@ -172,15 +172,15 @@ class Table
     if fields.length != self.columns.length
       raise RuntimeError, 'Invalid number of columns!'
     end
-    fields.each_with_index { |field, idx|
-      # Remove whitespace and ensure String format
-      field = field.to_s.strip
-      if (colprops[idx]['MaxWidth'] < field.to_s.length)
+    index = 0
+    while index < fields.size
+      field = fields[index].to_s.strip
+      if (colprops[idx]['MaxWidth'] < field.length)
         old = colprops[idx]['MaxWidth']
-        colprops[idx]['MaxWidth'] = field.to_s.length
+        colprops[idx]['MaxWidth'] = field.length
       end
-    }
-
+      index += 1
+    end
     rows << fields
   end
 
@@ -347,7 +347,10 @@ protected
     barline  = nameline.dup
     last_col = nil
     last_idx = nil
-    columns.each_with_index { |col,idx|
+    
+    index = 0
+    while index < columns.size
+      col = columns[index]
       if (last_col)
         # This produces clean to_s output without truncation
         # Preserves full string in cells for to_csv output
@@ -362,8 +365,10 @@ protected
       barline << ('-' * col.length)
 
       last_col = col
-      last_idx = idx
-    }
+      last_idx = index 
+
+      index += 1
+    end
 
     return "#{nameline}\n#{barline}"
   end
@@ -382,21 +387,24 @@ protected
     line = ' ' * indent
     last_cell = nil
     last_idx = nil
-    row.each_with_index { |cell, idx|
-      if (idx != 0)
+    
+    index = 0
+    while index < rows.size
+      cell = rows[index]
+      if (index != 0)
         line << pad(' ', last_cell.to_s, last_idx)
       end
       # Limit wide cells
-      if colprops[idx]['MaxChar']
-        last_cell = cell.to_s[0..colprops[idx]['MaxChar'].to_i]
+      if colprops[index]['MaxChar']
+        last_cell = cell.to_s[0..colprops[index]['MaxChar'].to_i]
         line << last_cell
       else
         line << cell.to_s
         last_cell = cell
       end
-      last_idx = idx
-    }
-
+      last_idx = index 
+      index += 1
+    end
     return line + "\n"
   end
 
