@@ -347,7 +347,10 @@ protected
     barline  = nameline.dup
     last_col = nil
     last_idx = nil
-    columns.each_with_index { |col,idx|
+    
+    index = 0
+    while index < columns.size
+      col = columns[index]
       if (last_col)
         # This produces clean to_s output without truncation
         # Preserves full string in cells for to_csv output
@@ -362,8 +365,10 @@ protected
       barline << ('-' * col.length)
 
       last_col = col
-      last_idx = idx
-    }
+      last_idx = index 
+
+      index += 1
+    end
 
     return "#{nameline}\n#{barline}"
   end
