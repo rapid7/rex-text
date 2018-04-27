@@ -45,7 +45,7 @@ module Rex
         this_str = ""
         index = 0
         while index < c.size
-          this_str << letters[c[index]][index]
+          this_str << letters[index][c[index]]
           index += 1
         end
         mixed << this_str
