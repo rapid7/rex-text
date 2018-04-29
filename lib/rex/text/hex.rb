@@ -16,6 +16,8 @@ module Rex
     # @param count [Integer] Number of bytes to put in each escape chunk
     # @return [String] The escaped hex version of +str+
     def self.to_hex(str, prefix = "\\x", count = 1)
+      return str.each_byte.map { |byte| prefix + byte.to_s(16) }.join if count == 1
+      
       raise ::RuntimeError, "unable to chunk into #{count} byte chunks" if ((str.length % count) > 0)
 
       # XXX: Regexp.new is used here since using /.{#{count}}/o would compile
