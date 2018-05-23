@@ -33,5 +33,19 @@ module Rex
     def self.sha1(str)
       Digest::SHA1.hexdigest(str)
     end
+    
+    #
+    # Raw SHA2 digest of the supplied string
+    #
+    def self.sha2_raw(str)
+      Digest::SHA2.digest(str)
+    end
+
+    #
+    # Hexidecimal SHA2 digest of the supplied string
+    #
+    def self.sha2(str)
+      Digest::SHA2.hexdigest(str)
+    end
   end
 end
