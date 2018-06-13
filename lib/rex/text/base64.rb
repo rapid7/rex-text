@@ -10,8 +10,12 @@ module Rex
     #
     # Base64 encoder
     #
-    def self.encode_base64(str, delim='')
-      [str.to_s].pack("m").gsub(/\s+/, delim)
+    def self.encode_base64(str, delim=nil)
+      if delim
+        [str.to_s].pack("m").gsub(/\s+/, delim)
+      else
+        [str.to_s].pack("m0")
+      end
     end
 
     #
@@ -24,7 +28,7 @@ module Rex
     #
     # Base64 encoder (URL-safe RFC6920)
     #
-    def self.encode_base64url(str, delim='')
+    def self.encode_base64url(str, delim=nil)
       encode_base64(str, delim).
         tr('+/', '-_').
         gsub('=', '')
