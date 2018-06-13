@@ -83,18 +83,7 @@ module Rex
     # @param arr [Array] The array to be shuffled
     # @return [Array]
     def self.shuffle_a(arr)
-      len = arr.length
-      max = len - 1
-      cyc = [* (0..max) ]
-      for d in cyc
-        e = rand(d+1)
-        next if e == d
-        f = arr[d];
-        g = arr[e];
-        arr[d] = g;
-        arr[e] = f;
-      end
-      return arr
+      arr.shuffle!
     end
 
     # Permute the case of a word
