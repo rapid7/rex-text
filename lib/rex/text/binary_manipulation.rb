@@ -58,8 +58,7 @@ module Rex
     # strict - include *only* words, no boundary characters (like spaces, etc.)
     #
     def self.to_words( str, strict = false )
-      return str.split(/\b/) unless strict
-      str.scan(/\w+/)
+      strict ? str.scan(/\w+/) : str.split(/\b/)
     end
 
     #
