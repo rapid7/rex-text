@@ -38,6 +38,11 @@ describe Rex::Text do
       expect { Rex::Text.xor(bad_key, hello_world_str) }.to raise_error(ArgumentError)
     end
 
+    it 'raises an ArgumentError due to an empty key' do
+      bad_key = ''
+      expect { Rex::Text.xor(bad_key, hello_world_str) }.to raise_error(ArgumentError)
+    end
+
     it 'raises an ArgumentError due to an out of range key' do
       bad_key = 0x1024
       expect { Rex::Text.xor(bad_key, hello_world_str) }.to raise_error(ArgumentError)
