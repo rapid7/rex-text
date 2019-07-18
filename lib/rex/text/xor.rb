@@ -29,6 +29,11 @@ module Rex::Text
       xor_key = [xor_key].pack('C')
     end
 
+    # Check for empty strings
+    if xor_key.empty? || value.empty?
+      raise ArgumentError, 'XOR key and value must not be empty'
+    end
+
     # Get byte arrays for key and value
     xor_key   = xor_key.bytes
     xor_value = value.bytes
