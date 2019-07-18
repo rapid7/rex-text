@@ -23,6 +23,16 @@ describe Rex::Text do
       expect(Rex::Text.xor(xor_key, hello_world_str)).to eq(xor_hello_world_str)
     end
 
+    it 'XORs with a variable-length key' do
+      xor_key = "\x00\x00\x00\x00\x00\x0c"
+      expect(Rex::Text.xor(xor_key, hello_world_str)).to eq('hello,world')
+    end
+
+    it 'raises an ArgumentError due to a nil key' do
+      bad_key = nil
+      expect { Rex::Text.xor(bad_key, hello_world_str) }.to raise_error(ArgumentError)
+    end
+
     it 'raises an ArgumentError due to an out of range key' do
       bad_key = 0x1024
       expect { Rex::Text.xor(bad_key, hello_world_str) }.to raise_error(ArgumentError)
