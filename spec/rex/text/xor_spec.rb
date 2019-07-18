@@ -28,6 +28,11 @@ describe Rex::Text do
       expect(Rex::Text.xor(xor_key, hello_world_str)).to eq('hello,world')
     end
 
+    it 'XORs with itself' do
+      xor_key = hello_world_str
+      expect(Rex::Text.xor(xor_key, hello_world_str)).to eq("\x00" * hello_world_str.length)
+    end
+
     it 'raises an ArgumentError due to a nil key' do
       bad_key = nil
       expect { Rex::Text.xor(bad_key, hello_world_str) }.to raise_error(ArgumentError)
