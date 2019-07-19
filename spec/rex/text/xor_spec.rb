@@ -18,11 +18,6 @@ describe Rex::Text do
       expect(Rex::Text.xor(xor_key, hello_world_str)).to eq(xor_hello_world_str)
     end
 
-    it 'XORs with a string type key' do
-      xor_key = "0x0f"
-      expect(Rex::Text.xor(xor_key, hello_world_str)).to eq(xor_hello_world_str)
-    end
-
     it 'XORs with a variable-length key' do
       xor_key = "\x00\x00\x00\x00\x00\x0c"
       expect(Rex::Text.xor(xor_key, hello_world_str)).to eq('hello,world')
