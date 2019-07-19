@@ -20,7 +20,7 @@ module Rex::Text
 
         key
       when Integer
-        unless key.between?(0, 255)
+        unless key.between?(0x00, 0xff)
           raise ArgumentError, 'XOR key must be between 0x00 and 0xff'
         end
 
