@@ -63,7 +63,7 @@ module Rex
     # Converts a raw string into a python buffer
     #
     def self.to_python(str, wrap = DefaultWrap, name = "buf")
-      return hexify(str, wrap, "#{name} += \"", '"', "#{name} =  \"\"\n", '"')
+      return hexify(str, wrap, "#{name} += b\"", '"', "#{name} =  b\"\"\n", '"')
     end
 
     #
