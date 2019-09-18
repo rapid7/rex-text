@@ -152,5 +152,13 @@ module Rex
       return wordwrap(str, 0, wrap, '', '# ')
     end
 
+    #
+    # Creates a psh-style comment
+    #
+    def self.to_psh_comment(str, wrap = DefaultWrap)
+      return wordwrap(str, 0, wrap, '', '# ')
+    end
+
+
   end
 end
