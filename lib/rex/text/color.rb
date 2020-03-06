@@ -49,18 +49,18 @@ module Color
     supports_color?() ? ansi(*color) : ''
   end
 
-  def highlight_words(str, words, background)
+  def color_substrings(str, substrings, color)
     str_cp = str.clone
-    words.each do |w|
+    substrings.each do |s|
       # Regex used to pull out matches and preserve case sensitivity
-      matches = str_cp.scan(%r{#{w}}i)
+      matches = str_cp.scan(%r{#{s}}i)
      
       matches.each do |m|
-        str_cp.gsub!(m, background << m << '%clr')
+        str_cp.gsub!(m, color << m << '%clr')
       end
     end
 
-    substitute_colors(str_cp)
+    str_cp
   end
 
   def substitute_colors(msg, in_prompt = nil)
