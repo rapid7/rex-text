@@ -57,6 +57,10 @@ class Table
   #
   #	The column to sort the table on, -1 disables sorting.
   #
+  # ColProps
+  #
+  # A hash specifying column MaxWidth, Stylers, and Formatters.
+  #
   def initialize(opts = {})
     self.header   = opts['Header']
     self.headeri  = opts['HeaderIndent'] || 0
@@ -79,6 +83,8 @@ class Table
     self.columns.length.times { |idx|
       self.colprops[idx] = {}
       self.colprops[idx]['MaxWidth'] = self.columns[idx].length
+      self.colprops[idx]['Stylers'] = []
+      self.colprops[idx]['Formatters'] = []
     }
 
     # ensure all our internal state gets updated with the given rows by
@@ -172,16 +178,19 @@ class Table
     if fields.length != self.columns.length
       raise RuntimeError, 'Invalid number of columns!'
     end
-    fields.each_with_index { |field, idx|
+    formatted_fields = fields.map.with_index { |field, idx|
       # Remove whitespace and ensure String format
-      field = field.to_s.strip
+      field = format_table_field(field.to_s.strip, idx)
+
       if (colprops[idx]['MaxWidth'] < field.to_s.length)
         old = colprops[idx]['MaxWidth']
         colprops[idx]['MaxWidth'] = field.to_s.length
       end
+
+      field
     }
 
-    rows << fields
+    rows << formatted_fields
   end
 
   def ip_cmp(a, b)
@@ -389,9 +398,9 @@ protected
       # Limit wide cells
       if colprops[idx]['MaxChar']
         last_cell = cell.to_s[0..colprops[idx]['MaxChar'].to_i]
-        line << last_cell
+        line << style_table_field(last_cell, idx)
       else
-        line << cell.to_s
+        line << style_table_field(cell.to_s, idx)
         last_cell = cell
       end
       last_idx = idx
@@ -425,6 +434,25 @@ protected
     return val
   end
 
+  def format_table_field(str, idx)
+    str_cp = str.clone
+    
+    colprops[idx]['Formatters'].each do |f|
+      str_cp = f.format(str_cp)
+    end
+
+    str_cp
+  end
+
+  def style_table_field(str, idx)
+    str_cp = str.clone
+    
+    colprops[idx]['Stylers'].each do |s|
+      str_cp = s.style(str_cp)
+    end
+
+    str_cp
+  end
 
 end
 
