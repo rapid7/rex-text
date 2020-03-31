@@ -423,7 +423,8 @@ protected
         __method__.to_s << ': String with unsupported encoding caught!'
     end
     utf8_buf = buf.dup.force_encoding("UTF-8")
-    remainder = max - utf8_buf.length
+    hans_size = utf8_buf.size - utf8_buf.gsub(/[\u4e00-\u9fa5]/, '').size
+    remainder = max - utf8_buf.length - hans_size
     remainder = 0 if remainder < 0
     val       = chr * remainder
 
