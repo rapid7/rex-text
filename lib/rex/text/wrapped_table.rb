@@ -1,5 +1,6 @@
 # -*- coding: binary -*-
 require 'ipaddr'
+require 'io/console'
 
 module Rex
 module Text
@@ -10,35 +11,8 @@ module Text
 # whatever.
 #
 ###
-class Table
-
-  # Temporary forking logic for using the prototype `WrappedTable` implementation.
-  #
-  # This method replaces the default `Table.new` with the ability to call the `WrappedTable` class instead,
-  # to allow users to safely toggle between wrapped/unwrapped tables at a global level without changing
-  # their existing codebases. This approach will reduce the risk of enabling wrapped table behavior by default.
-  #
-  # To enforce all tables to be wrapped to the terminal's current width, call `Table.wrap_tables!`
-  # before invoking `Table.new` as normal.
-  def self.new(*args, &block)
-    if wrap_tables?
-      table_options = args[0]
-      return ::Rex::Text::WrappedTable.new(table_options)
-    end
-    return super(*args, &block)
-  end
-
-  def self.wrap_tables?
-    @@wrapped_tables_enabled ||= false
-  end
-
-  def self.wrap_tables!
-    @@wrapped_tables_enabled = true
-  end
-
-  def self.unwrap_tables!
-    @@wrapped_tables_enabled = false
-  end
+# private_constant
+class WrappedTable
 
   #
   # Initializes a text table instance using the supplied properties.  The
@@ -96,7 +70,8 @@ class Table
     # updated below if we got a "Rows" option
     self.rows     = []
 
-    self.width    = opts['Width']   || 80
+    # TODO: Discuss a cleaner way to handle this information
+    self.width    = opts['Width']   || ::IO.console.winsize[1]
     self.indent   = opts['Indent']  || 0
     self.cellpad  = opts['CellPad'] || 2
     self.prefix   = opts['Prefix']  || ''
@@ -111,6 +86,7 @@ class Table
     self.columns.length.times { |idx|
       self.colprops[idx] = {}
       self.colprops[idx]['MaxWidth'] = self.columns[idx].length
+      self.colprops[idx]['WordWrap'] = true
       self.colprops[idx]['Stylers'] = []
       self.colprops[idx]['Formatters'] = []
     }
@@ -210,9 +186,9 @@ class Table
       # Remove whitespace and ensure String format
       field = format_table_field(field.to_s.strip, idx)
 
-      if (colprops[idx]['MaxWidth'] < field.to_s.length)
+      if (colprops[idx]['MaxWidth'] < display_width(field.to_s))
         old = colprops[idx]['MaxWidth']
-        colprops[idx]['MaxWidth'] = field.to_s.length
+        colprops[idx]['MaxWidth'] = display_width(field.to_s)
       end
 
       field
@@ -380,29 +356,28 @@ protected
   # Converts the columns to a string.
   #
   def columns_to_s # :nodoc:
-    nameline = ' ' * indent
-    barline  = nameline.dup
-    last_col = nil
-    last_idx = nil
-    columns.each_with_index { |col,idx|
-      if (last_col)
-        # This produces clean to_s output without truncation
-        # Preserves full string in cells for to_csv output
-        padding = pad(' ', last_col, last_idx)
-        nameline << padding
-        remainder = padding.length - cellpad
-        remainder = 0 if remainder < 0
-        barline << (' ' * (cellpad + remainder))
+    optimal_widths = calculate_optimal_widths
+    values_as_chunks = chunk_values(columns, optimal_widths)
+    result = chunks_to_s(values_as_chunks, optimal_widths)
+
+    barline = ""
+    columns.each.with_index do |_column, idx|
+      bar_width = display_width(values_as_chunks[idx].first)
+      column_width = optimal_widths[idx]
+
+      if idx == 0
+        barline << ' ' * indent
       end
 
-      nameline << col
-      barline << ('-' * col.length)
+      barline << '-' * bar_width
+      is_last_column = (idx + 1) == columns.length
+      unless is_last_column
+        barline << ' ' * (column_width - bar_width)
+        barline << ' ' * cellpad
+      end
+    end
 
-      last_col = col
-      last_idx = idx
-    }
-
-    return "#{nameline}\n#{barline}"
+    result + barline
   end
 
   #
@@ -416,73 +391,142 @@ protected
   # Converts a row to a string.
   #
   def row_to_s(row) # :nodoc:
-    line = ' ' * indent
-    last_cell = nil
-    last_idx = nil
-    row.each_with_index { |cell, idx|
-      if (idx != 0)
-        line << pad(' ', last_cell.to_s, last_idx)
-      end
-      # Limit wide cells
-      if colprops[idx]['MaxChar']
-        last_cell = cell.to_s[0..colprops[idx]['MaxChar'].to_i]
-        line << style_table_field(last_cell, idx)
-      else
-        line << style_table_field(cell.to_s, idx)
-        last_cell = cell
-      end
-      last_idx = idx
-    }
-
-    return line + "\n"
+    optimal_widths = calculate_optimal_widths
+    values_as_chunks = chunk_values(row, optimal_widths)
+    chunks_to_s(values_as_chunks, optimal_widths)
   end
 
   #
-  # Pads out with the supplied character for the remainder of the space given
-  # some text and a column index.
+  # Placeholder function that aims to calculate the display width of the given string.
+  # In the future this will be aware of East Asian characters having different display
+  # widths. For now it simply returns the string's length.
   #
-  def pad(chr, buf, colidx, use_cell_pad = true) # :nodoc:
-    # Ensure we pad the minimum required amount
-    max = colprops[colidx]['MaxChar'] || colprops[colidx]['MaxWidth']
-    max = colprops[colidx]['MaxWidth'] if max.to_i > colprops[colidx]['MaxWidth'].to_i
-    encoding = buf.encoding.name
-    if not ["UTF-8", "ASCII-8BIT", "US-ASCII"].include? encoding
-      warn '**WARNING** In file ' << __FILE__ << '::' <<\
-        __method__.to_s << ': String with unsupported encoding caught!'
-    end
-    utf8_buf = buf.dup.force_encoding("UTF-8")
-    if !utf8_buf.valid_encoding?
-      hans_size = 0
-    else
-      hans_size = utf8_buf.size - utf8_buf.gsub(/\p{Han}+/u, '').size
-    end
-    remainder = max - utf8_buf.length - hans_size
-    remainder = 0 if remainder < 0
-    val       = chr * remainder
+  def display_width(str)
+    str.length
+  end
 
-    if (use_cell_pad)
-      val << ' ' * cellpad
+  def chunk_values(values, optimal_widths)
+    # First split long strings into an array of chunks, where each chunk size is the calculated column width
+    values_as_chunks = values.each_with_index.map do |value, idx|
+      column_width = optimal_widths[idx]
+      value
+        .split('')
+        .each_slice(column_width)
+        .map(&:join)
     end
 
-    return val
+    values_as_chunks
+  end
+
+  def chunks_to_s(values_as_chunks, optimal_widths)
+    result = ''
+
+    interleave(values_as_chunks).each do |row_chunks|
+      line = ""
+      row_chunks.each_with_index do |chunk, idx|
+        column_width = optimal_widths[idx]
+
+        if idx == 0
+          line << ' ' * indent
+        end
+
+        line << chunk.to_s.ljust(column_width)
+        line << ' ' * cellpad
+      end
+
+      result << line.rstrip << "\n"
+    end
+
+    result
+  end
+
+  def interleave(arrays)
+    max_length = arrays.map(&:size).max
+    padding = [nil] * max_length
+    with_left_extra_column = padding.zip(*arrays)
+    without_extra_column = with_left_extra_column.map { |columns| columns.drop(1) }
+
+    without_extra_column
+  end
+
+  def calculate_optimal_widths
+    # Calculate the minimum width each column can be. This is dictated by the user.
+    user_influenced_column_widths = colprops.map do |colprop|
+      if colprop['WordWrap'] == false
+        colprop['MaxWidth']
+        raise 'Not implemented'
+      else
+        nil
+      end
+    end
+
+    required_padding = indent + (colprops.length) * cellpad
+    available_space = self.width - user_influenced_column_widths.sum(&:to_i) - required_padding
+    remaining_column_calculations = user_influenced_column_widths.select(&:nil?).count
+
+    # Calculate the initial widths, which will need an additional refinement to reallocate surplus space
+    naive_optimal_width_calculations = colprops.map.with_index do |colprop, index|
+      shared_column_width = available_space / [remaining_column_calculations, 1].max
+      remaining_column_calculations -= 1
+
+      if user_influenced_column_widths[index]
+        { width: user_influenced_column_widths[index], wrapped: false }
+      elsif colprop['MaxWidth'] < shared_column_width
+        available_space -= colprop['MaxWidth']
+        { width: colprop['MaxWidth'], wrapped: false }
+      else
+        available_space -= shared_column_width
+        { width: shared_column_width, wrapped: true }
+      end
+    end
+
+    # Naively redistribute any surplus space to columns that were wrapped, and try to fit the cell on one line still
+    current_width = naive_optimal_width_calculations.sum { |width| width[:width] }
+    surplus_width = self.width - current_width - required_padding
+    # revisit all columns that were wrapped and add add additional characters
+    revisiting_column_counts = naive_optimal_width_calculations.count { |width| width[:wrapped] }
+    optimal_widths = naive_optimal_width_calculations.map.with_index do |naive_width, index|
+      additional_column_width = surplus_width / [revisiting_column_counts, 1].max
+      revisiting_column_counts -= 1
+
+      if naive_width[:wrapped]
+        max_width = colprops[index]['MaxWidth']
+        if max_width < (naive_width[:width] + additional_column_width)
+          surplus_width -= max_width - naive_width[:width]
+          max_width
+        else
+          surplus_width -= additional_column_width
+          naive_width[:width] + additional_column_width
+        end
+      else
+        naive_width[:width]
+      end
+    end
+
+    # In certain scenarios columns can be allocated 0 widths if it's completely impossible to fit the columns into the
+    # given space. There's different ways to handle that, for instance truncating data in the table to the initial
+    # columns that can fit. For now, we just ensure every width is at least 1 or more character wide, and in the future
+    # it may have to truncate columns entirely.
+    optimal_widths.map { |width| [1, width].max }
   end
 
   def format_table_field(str, idx)
-    str_cp = str.clone
+    str_cp = str.dup
 
     colprops[idx]['Formatters'].each do |f|
       str_cp = f.format(str_cp)
     end
 
-    str_cp
+    str_cp.dup.force_encoding('UTF-8')
   end
 
-  def style_table_field(str, idx)
-    str_cp = str.clone
+  def style_table_field(str, _idx)
+    str_cp = str.dup
 
-    colprops[idx]['Stylers'].each do |s|
-      str_cp = s.style(str_cp)
-    end
+    # Not invoking as color currently conflicts with the wrapping of tables
+    # colprops[idx]['Stylers'].each do |s|
+    #   str_cp = s.style(str_cp)
+    # end
 
     str_cp
   end
