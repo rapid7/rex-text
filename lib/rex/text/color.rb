@@ -52,7 +52,7 @@ module Color
   def substitute_colors(msg, in_prompt = nil)
     str = msg.dup
     pre_color = post_color = ''
-    if (in_prompt)
+    if (in_prompt && supports_color?)
       pre_color = "\x01"  # RL_PROMPT_START_IGNORE
       post_color = "\x02" # RL_PROMPT_END_IGNORE
     end
