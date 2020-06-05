@@ -127,7 +127,7 @@ module Rex
       buff = "#{name} = Array("
       maxbytes = 80
 
-      1.upto(code.length) do |idx|
+      0.upto(code.length) do |idx|
         buff << code[idx].to_s
         buff << "," if idx < code.length - 1
         buff << " _\r\n" if (idx > 1 and (idx % maxbytes) == 0)
