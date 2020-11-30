@@ -220,7 +220,7 @@ module Rex
     # @return [String] a UTF-8 equivalent
     # @note This method will discard invalid characters
     def self.to_utf8(str)
-      str.encode('utf-8', { :invalid => :replace, :undef => :replace, :replace => '' })
+      str.encode('utf-8', **{ :invalid => :replace, :undef => :replace, :replace => '' })
     end
 
     #
