@@ -21,7 +21,7 @@ class Table
   # To enforce all tables to be wrapped to the terminal's current width, call `Table.wrap_tables!`
   # before invoking `Table.new` as normal.
   def self.new(*args, &block)
-    if wrap_tables? && !::IO.console.nil?
+    if wrap_tables?
       table_options = args[0]
       return ::Rex::Text::WrappedTable.new(table_options)
     end
