@@ -1,6 +1,7 @@
 # -*- coding: binary -*-
 require 'ipaddr'
 require 'io/console'
+require 'bigdecimal'
 
 module Rex
 module Text
@@ -70,8 +71,7 @@ class WrappedTable
     # updated below if we got a "Rows" option
     self.rows     = []
 
-    # TODO: Discuss a cleaner way to handle this information
-    self.width    = opts['Width']   || ::IO.console.winsize[1]
+    self.width    = opts['Width']   || ::IO.console&.winsize&.[](1) || ::BigDecimal::INFINITY
     self.indent   = opts['Indent']  || 0
     self.cellpad  = opts['CellPad'] || 2
     self.prefix   = opts['Prefix']  || ''

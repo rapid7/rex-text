@@ -42,31 +42,32 @@ end
 
 describe Rex::Text::Table do
   let(:formatter) do
-    Formatter = Class.new do
+    clazz = Class.new do
       def format(str)
         "IHAVEBEENFORMATTED#{str}"
       end
     end
 
-    Formatter.new
+    clazz.new
   end
 
   let(:styler) do
-    Styler = Class.new do
+    clazz = Class.new do
       def style(str)
         "IHAVEBEENSTYLED#{str}"
       end
     end
 
-    Styler.new
+    clazz.new
   end
 
   let(:mock_window_size_rows) { 30 }
   let(:mock_window_size_columns) { 180 }
   let(:mock_window_size) { [mock_window_size_rows, mock_window_size_columns] }
+  let(:mock_io_console) { double(:console, winsize: mock_window_size) }
 
   before(:each) do
-    allow(::IO.console).to receive(:winsize).and_return(mock_window_size)
+    allow(::IO).to receive(:console).and_return(mock_io_console)
     allow(Rex::Text::Table).to receive(:wrap_tables?).and_return(true)
   end
 
@@ -112,6 +113,36 @@ describe Rex::Text::Table do
   end
 
   describe "#to_s" do
+    describe 'width calculation' do
+      let(:default_options) do
+        {
+          'Header' => 'Header',
+          'Columns' => [
+            'Column 1',
+            'Column 2',
+            'Column 3'
+          ]
+        }
+      end
+      let(:table) { Rex::Text::Table.new(options) }
+
+      context 'when a width is specified' do
+        let(:options) { default_options.merge({ 'Width' =>  100 }) }
+        it { expect(table.width).to eql 100 }
+      end
+
+      context 'when a width is not specified' do
+        let(:options) { default_options }
+        it { expect(table.width).to eql 180 }
+      end
+
+      context 'when the IO.console API is not available' do
+        let(:options) { default_options }
+        let(:mock_io_console) { nil }
+        it { expect(table.width).to eql BigDecimal::INFINITY }
+      end
+    end
+
     it 'should space columns correctly' do
       col_1_field = "A" * 5
       col_2_field = "B" * 50
