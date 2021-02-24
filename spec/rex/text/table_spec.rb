@@ -22,6 +22,39 @@ describe Rex::Text::Table do
     Styler.new
   end
 
+  describe '.wrap_table?' do
+    let(:default_table_options) { [{ }] }
+    let(:wrapped_table_options) { [{ 'WrapTable' => true }] }
+    let(:feature_enabled) { false }
+
+    before(:each) do
+      allow(described_class).to receive(:wrapped_tables?).and_return(feature_enabled)
+    end
+
+    context 'when the feature is enabled' do
+      let(:feature_enabled) { true }
+
+      it "defaults to true" do
+        expect(described_class.wrap_table?(default_table_options)).to be true
+      end
+
+      it "ignores the user preference" do
+        expect(described_class.wrap_table?(wrapped_table_options)).to be true
+      end
+    end
+
+    context 'when the feature is disabled' do
+      let(:feature_enabled) { false }
+
+      it "defaults to false" do
+        expect(described_class.wrap_table?(default_table_options)).to be false
+      end
+
+      it "ignores the user preference" do
+        expect(described_class.wrap_table?(wrapped_table_options)).to be false
+      end
+    end
+  end
 
   it 'should space columns correctly' do
     col_1_field = "A" * 5
