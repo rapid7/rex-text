@@ -24,7 +24,8 @@ describe Rex::Text::Table do
 
   describe '.wrap_table?' do
     let(:default_table_options) { [{ }] }
-    let(:wrapped_table_options) { [{ 'WrapTable' => true }] }
+    let(:enable_wrapped_table_options) { [{ 'WordWrap' => true }] }
+    let(:disable_wrapped_table_options) { [{ 'WordWrap' => false }] }
     let(:feature_enabled) { false }
 
     before(:each) do
@@ -38,8 +39,12 @@ describe Rex::Text::Table do
         expect(described_class.wrap_table?(default_table_options)).to be true
       end
 
-      it "ignores the user preference" do
-        expect(described_class.wrap_table?(wrapped_table_options)).to be true
+      it "returns the user preference when set to true" do
+        expect(described_class.wrap_table?(enable_wrapped_table_options)).to be true
+      end
+
+      it "returns the user preference when set to false" do
+        expect(described_class.wrap_table?(disable_wrapped_table_options)).to be false
       end
     end
 
@@ -50,9 +55,13 @@ describe Rex::Text::Table do
         expect(described_class.wrap_table?(default_table_options)).to be false
       end
 
-      it "ignores the user preference" do
-        expect(described_class.wrap_table?(wrapped_table_options)).to be false
+      it "ignores the user preference when set to true" do
+        expect(described_class.wrap_table?(enable_wrapped_table_options)).to be false
       end
+
+      it "ignores the user preference when set to false" do
+        expect(described_class.wrap_table?(disable_wrapped_table_options)).to be false
+      end      
     end
   end
 
