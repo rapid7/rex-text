@@ -68,7 +68,7 @@ describe Rex::Text::Table do
 
   before(:each) do
     allow(::IO).to receive(:console).and_return(mock_io_console)
-    allow(Rex::Text::Table).to receive(:wrap_tables?).and_return(true)
+    allow(Rex::Text::Table).to receive(:wrap_table?).with(anything).and_return(true)
   end
 
   describe "#to_csv" do
