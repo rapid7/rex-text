@@ -260,7 +260,7 @@ module Rex
     end
 
     # Generate a strong password of specified length and attributes
-    def self.rand_password(len=10, uppercase=true, lowercase=true, numbers=true, special=true)
+    def self.rand_password(len=10, uppercase=true, lowercase=true, numbers=true, special=false)
       foo=[]
       upper=('A'..'Z').to_a
       lower=('a'..'z').to_a
