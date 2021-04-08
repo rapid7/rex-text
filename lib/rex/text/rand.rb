@@ -266,9 +266,7 @@ module Rex
       lower=('a'..'z').to_a
       number=('0'..'10').to_a
       specials = ((32..47).to_a + (58..64).to_a + (91..96).to_a + (123..126).to_a).pack('U*').chars
-      if uppercase
-        allowed_characters+=upper
-      end
+      allowed_characters+=upper
       if mix_case
         allowed_characters+=lower
       end
