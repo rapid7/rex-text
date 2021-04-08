@@ -273,7 +273,7 @@ module Rex
       if numbers
         allowed_characters+=number
       end
-      if special
+      if special_characters
         allowed_characters+=specials
       end
       rand_base(len,'',*allowed_characters)
