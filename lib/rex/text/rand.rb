@@ -258,5 +258,25 @@ module Rex
       mail_address << '@'
       mail_address << Rex::Text.rand_hostname
     end
+
+    # Generate a strong password of specified length and attributes
+    def self.rand_password(len=10, mix_case:true, numbers:true, special_characters: false)
+      allowed_characters=[]
+      upper=('A'..'Z').to_a
+      lower=('a'..'z').to_a
+      number=('0'..'10').to_a
+      specials = ((32..47).to_a + (58..64).to_a + (91..96).to_a + (123..126).to_a).pack('U*').chars
+      allowed_characters+=upper
+      if mix_case
+        allowed_characters+=lower
+      end
+      if numbers
+        allowed_characters+=number
+      end
+      if special_characters
+        allowed_characters+=specials
+      end
+      rand_base(len,'',*allowed_characters)
+    end
   end
 end
