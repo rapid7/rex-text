@@ -92,6 +92,15 @@ module Rex
       "tammy", "teresa", "theresa", "tina", "virginia", "wanda"
     ]
 
+    Func_Verb = [
+      "get", "set", "put", "describe", "acquire", "release", "initialize", "free",
+      "init", "find", "list", "create", "destroy"
+    ]
+
+    Func_Subj = [
+      "file", "directory", "dir", "address", "addr", "process", "proc", "user",
+      "privileges", "priv", "attribute", "attr", "mutex", "handle", "type"
+    ]
 
     # Generates a random character.
     def self.rand_char(bad, chars = AllChars)
@@ -277,6 +286,13 @@ module Rex
         allowed_characters+=specials
       end
       rand_base(len,'',*allowed_characters)
+    end
+
+    # Generate a random function name
+    def self.rand_func_name
+      verb = rand(9) > 4 ? Func_Verb.sample.capitalize : Func_Verb.sample
+      subj = rand(9) > 4 ? Func_Subj.sample.capitalize : Func_Subj.sample
+      verb + subj
     end
   end
 end
