@@ -39,6 +39,21 @@ module Rex
     end
 
     #
+    # Converts a raw string into a nim buffer
+    #
+    def self.to_nim(str, wrap = DefaultWrap, name = "buf")
+      ret = "var #{name}: array[#{str.length}, byte] = ["
+      i = -1;
+      while (i += 1) < str.length
+        ret << "\n byte " if i == 0
+        ret << "\n  " if i%(wrap/4) == 0 and i != 0
+        ret << "0x" << str[i].unpack("H*")[0] << ","
+      end
+      ret = ret[0..ret.length-2] # cut off last comma
+      ret << " ]\n"
+    end
+ 
+    #
     # Creates a c-style comment
     #
     def self.to_c_comment(str, wrap = DefaultWrap)
