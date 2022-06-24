@@ -184,11 +184,11 @@ class WrappedTable
     end
     formatted_fields = fields.map.with_index { |field, idx|
       # Remove whitespace and ensure String format
-      field = format_table_field(field.to_s.strip, idx)
+      field = format_table_field(field, idx)
 
-      if (colprops[idx]['MaxWidth'] < display_width(field.to_s))
+      if (colprops[idx]['MaxWidth'] < display_width(field))
         old = colprops[idx]['MaxWidth']
-        colprops[idx]['MaxWidth'] = display_width(field.to_s)
+        colprops[idx]['MaxWidth'] = display_width(field)
       end
 
       field
@@ -410,7 +410,7 @@ protected
     values_as_chunks = values.each_with_index.map do |value, idx|
       column_width = optimal_widths[idx]
       value
-        .split('')
+        .chars
         .each_slice(column_width)
         .map(&:join)
     end
@@ -511,13 +511,13 @@ protected
   end
 
   def format_table_field(str, idx)
-    str_cp = str.dup
+    str_cp = str.to_s.encode('UTF-8', invalid: :replace, undef: :replace).strip
 
     colprops[idx]['Formatters'].each do |f|
       str_cp = f.format(str_cp)
     end
 
-    str_cp.dup.force_encoding('UTF-8')
+    str_cp
   end
 
   def style_table_field(str, _idx)

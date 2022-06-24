@@ -92,13 +92,29 @@ describe Rex::Text::Table do
         "Administratör".force_encoding("UTF-8"),
         "Administratör".force_encoding("UTF-8")
       ]
+       # "Administrator’s Shares".encode("UTF-16LE")
+       tbl << [
+        "\x41\x00\x64\x00\x6d\x00\x69\x00\x6e\x00\x69\x00\x73\x00\x74\x00" \
+        "\x72\x00\x61\x00\x74\x00\x6f\x00\x72\x00\x19\x20\x73\x00\x20\x00" \
+        "\x53\x00\x68\x00\x61\x00\x72\x00\x65\x00\x73\x00".force_encoding("UTF-16LE")
+      ] * 2
+
       tbl << [
-        "Administrator’s Shares".force_encoding("UTF-16LE"),
-        "Administrator’s Shares".force_encoding("UTF-16LE")
+        "这是中文这是中文这是中文这是中文".force_encoding("UTF-8"),
+        "这是中文这是中文这是中文这是中文".force_encoding("UTF-8")
       ]
+
       tbl << [
-        "这是中文这是中文这是中文这是中文",
-        "这是中文这是中文这是中文这是中文"
+        # Contains invalid UTF-8 bytes
+        "\x85\x5f\x9c\xbc\x10\x7f\x11\x4e\x8e\x8e\xeb\x3a\x54\x33\x41\xb0".force_encoding('UTF-8'),
+        # 四Ⅰ
+        "\xe5\x9b\x9b\xe2\x85\xa0".force_encoding("UTF-8")
+      ]
+
+      tbl << [
+        '👍👍👍👍👍👍'.force_encoding('UTF-8'),
+        # Hello 日本
+        "hello \x93\xfa\x96\x7b".force_encoding("SHIFT_JIS")
       ]
 
       expect(tbl.to_csv).to eql <<~TABLE.force_encoding("UTF-8")
@@ -107,6 +123,8 @@ describe Rex::Text::Table do
         "Administratör","Administratör"
         "Administrator’s Shares","Administrator’s Shares"
         "这是中文这是中文这是中文这是中文","这是中文这是中文这是中文这是中文"
+        "�_��\u0010\u007F\u0011N���:T3A�","四Ⅰ"
+        "👍👍👍👍👍👍","hello 日本"
       TABLE
       expect(tbl.to_s.lines).to all(have_maximum_width(80))
     end
@@ -481,15 +499,41 @@ describe Rex::Text::Table do
         tbl = Rex::Text::Table.new(options)
         tbl << ["hello world".force_encoding("ASCII-8BIT")] * 2
         tbl << ["Administratör".force_encoding("UTF-8")] * 2
-        tbl << ["Administrator’s Shares".force_encoding("UTF-16LE")] * 2
+
+        # "Administrator’s Shares".encode("UTF-16LE")
         tbl << [
-          "администраторадминистраторадминистратор",
-          "домен"
+          "\x41\x00\x64\x00\x6d\x00\x69\x00\x6e\x00\x69\x00\x73\x00\x74\x00" \
+          "\x72\x00\x61\x00\x74\x00\x6f\x00\x72\x00\x19\x20\x73\x00\x20\x00" \
+          "\x53\x00\x68\x00\x61\x00\x72\x00\x65\x00\x73\x00".force_encoding("UTF-16LE")
+        ] * 2
+
+        tbl << [
+          "администраторадминистраторадминистратор".force_encoding('UTF-8'),
+          "домен".force_encoding('UTF-8')
         ]
+
         tbl << ["这是中文这是中文这是中文这是中文".force_encoding("UTF-8")] * 2
         tbl << ["お好み焼き".force_encoding("UTF-8")] * 2
 
-        # Note:
+        tbl << [
+          # Contains invalid UTF-8 bytes
+          "\x85\x5f\x9c\xbc\x10\x7f\x11\x4e\x8e\x8e\xeb\x3a\x54\x33\x41\xb0".force_encoding('UTF-8'),
+          # 四Ⅰ
+          "\xe5\x9b\x9b\xe2\x85\xa0".force_encoding("UTF-8")
+        ]
+
+        tbl << [
+          '👍👍👍👍👍👍'.force_encoding('UTF-8'),
+          # Hello 日本
+          "hello \x93\xfa\x96\x7b".force_encoding("SHIFT_JIS")
+        ]
+
+        tbl << [
+          "N",
+          # Contains invalid bytes
+          "VMware \xce\xef\xc0\xed\xb4\xc5\xc5\xcc\xd6\xfa\xca\xd6\xb7\xfe\xce\xf1".force_encoding("ASCII-8BIT")
+        ]
+
         expect(tbl).to match_table <<~TABLE.force_encoding("UTF-8")
           Header
           ======
@@ -498,10 +542,13 @@ describe Rex::Text::Table do
             ----                                     -----
             Administrator’s Shares                   Administrator’s Shares
             Administratör                            Administratör
+            N                                        VMware ����������������
             hello world                              hello world
             администраторадминистраторадминистратор  домен
             お好み焼き                                    お好み焼き
             这是中文这是中文这是中文这是中文                         这是中文这是中文这是中文这是中文
+            �_��\u0010\u007F\u0011N���:T3A�                         四Ⅰ
+            👍👍👍👍👍👍                                   hello 日本
         TABLE
         expect(tbl.to_s.lines).to all(have_maximum_width(80))
       end
