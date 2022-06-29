@@ -183,7 +183,6 @@ class WrappedTable
       raise RuntimeError, 'Invalid number of columns!'
     end
     formatted_fields = fields.map.with_index { |field, idx|
-      # Remove whitespace and ensure String format
       field = format_table_field(field, idx)
 
       if (colprops[idx]['MaxWidth'] < display_width(field))
