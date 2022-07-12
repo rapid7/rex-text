@@ -118,6 +118,9 @@ class Table
     self.sort_index  = opts['SortIndex'] || 0
     self.sort_order  = opts['SortOrder'] || :forward
 
+    self.selected_index = opts['SelectedIndex']
+    self.selected_row_prefix = opts['SelectedRowPrefix'] || '*'
+
     # Default column properties
     self.columns.length.times { |idx|
       self.colprops[idx] = {}
@@ -153,11 +156,22 @@ class Table
     str << hr_to_s || ''
 
     sort_rows
-    rows.each { |row|
+    selected_row_prefix = self.selected_row_prefix || ''
+
+    rows.each_with_index { |row, idx|
       if (is_hr(row))
         str << hr_to_s
+        next
+      end
+
+      next unless row_visible(row)
+
+      if idx == self.selected_index && selected_row_prefix.length <= indent
+        r = row_to_s(row)
+        r[indent - (selected_row_prefix.length), selected_row_prefix.length] = selected_row_prefix
+        str << r
       else
-        str << row_to_s(row) if row_visible(row)
+        str << row_to_s(row)
       end
     }
 
@@ -361,6 +375,7 @@ class Table
   attr_accessor :width, :indent, :cellpad # :nodoc:
   attr_accessor :prefix, :postfix # :nodoc:
   attr_accessor :sort_index, :sort_order, :scterm # :nodoc:
+  attr_accessor :selected_index, :selected_row_prefix # :nodoc:
 
 protected
 
