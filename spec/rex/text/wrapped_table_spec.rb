@@ -17,7 +17,7 @@ describe Rex::Text::Table do
   let(:styler) do
     clazz = Class.new do
       def style(str)
-        "IHAVEBEENSTYLED#{str}"
+        "%blu#{str}%clr"
       end
     end
 
@@ -89,7 +89,7 @@ describe Rex::Text::Table do
         "�_��\u0010\u007F\u0011N���:T3A�","四Ⅰ"
         "👍👍👍👍👍👍","hello 日本"
       TABLE
-      expect(tbl.to_s.lines).to all(have_maximum_width(80))
+      expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
     end
   end
 
@@ -124,6 +124,71 @@ describe Rex::Text::Table do
       end
     end
 
+    it 'should return a blank table as no search terms were matched' do
+      col_1_field = "A" * 5
+      col_2_field = "B" * 50
+      col_3_field = "C" * 15
+
+      options = {
+        'Header' => 'Header',
+        'SearchTerm' => 'jim|bob',
+        'Columns' => [
+          'Column 1',
+          'Column 2',
+          'Column 3'
+        ]
+      }
+
+      tbl = Rex::Text::Table.new(options)
+
+      tbl << [
+        col_1_field,
+        col_2_field,
+        col_3_field
+      ]
+
+      expect(tbl.to_s).to eql <<~TABLE
+      Header
+      ======
+
+      Column 1  Column 2                                            Column 3
+      --------  --------                                            --------
+      TABLE
+    end
+
+    it 'should return the row as the row contains a match for the search term' do
+      col_1_field = "jim"
+      col_2_field = "B" * 50
+      col_3_field = "C" * 15
+
+      options = {
+        'Header' => 'Header',
+        'SearchTerm' => 'jim|bob',
+        'Columns' => [
+          'Column 1',
+          'Column 2',
+          'Column 3'
+        ]
+      }
+
+      tbl = Rex::Text::Table.new(options)
+
+      tbl << [
+        col_1_field,
+        col_2_field,
+        col_3_field
+      ]
+
+      expect(tbl.to_s).to eql <<~TABLE
+      Header
+      ======
+
+      Column 1  Column 2                                            Column 3
+      --------  --------                                            --------
+      jim       BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
+      TABLE
+    end
+
     it 'should space columns correctly' do
       col_1_field = "A" * 5
       col_2_field = "B" * 50
@@ -131,7 +196,6 @@ describe Rex::Text::Table do
 
       options = {
         'Header' => 'Header',
-        'SearchTerm' => ['jim', 'bob'],
         'Columns' => [
           'Column 1',
           'Column 2',
@@ -161,9 +225,9 @@ describe Rex::Text::Table do
       col_1_field = "A" * 5
       col_2_field = "B" * 50
       col_3_field = "C" * 15
+
       options = {
         'Header' => 'Header',
-        'SearchTerm' => ['jim', 'bob'],
         'Columns' => [
           'Column 1',
           'Column 2',
@@ -195,18 +259,12 @@ describe Rex::Text::Table do
     end
 
     it 'should apply field stylers correctly and NOT increase column length' do
-      skip(
-        "Functionality not implemented. Currently if there are colors present in a cell, the colors will break " \
-          "when word wrapping occurs. This is a regression in functionality with a normal Rex Table."
-      )
-
       col_1_field = "A" * 5
       col_2_field = "B" * 50
       col_3_field = "C" * 15
 
       options = {
         'Header' => 'Header',
-        'SearchTerm' => ['jim', 'bob'],
         'Columns' => [
           'Column 1',
           'Column 2',
@@ -233,7 +291,59 @@ describe Rex::Text::Table do
 
         Column 1  Column 2                                            Column 3
         --------  --------                                            --------
-        AAAAA     IHAVEBEENSTYLEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
+        AAAAA     %bluBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB%clr  CCCCCCCCCCCCCCC
+      TABLE
+    end
+
+    it 'should apply field stylers correctly and NOT increase column length when having a low width value' do
+      options = {
+        'Header' => 'Header',
+        'Width' => 3,
+        'Columns' => [
+          'Column 1',
+          'Column 2',
+          'Column 3'
+        ],
+        'ColProps' => {
+          'Column 2' => {
+            'Stylers' => [styler]
+          }
+        }
+      }
+
+      tbl = Rex::Text::Table.new(options)
+
+      tbl << [
+        "A" * 5,
+        "ABC ABCD ABC" * 1,
+        "C" * 5
+      ]
+
+      expect(tbl).to match_table <<~TABLE
+        Header
+        ======
+
+        C  C  C
+        o  o  o
+        l  l  l
+        u  u  u
+        m  m  m
+        n  n  n
+
+        1  2  3
+        -  -  -
+        A  %bluA%clr  C
+        A  %bluB%clr  C
+        A  %bluC%clr  C
+        A  %blu %clr  C
+        A  %bluA%clr  C
+           %bluB%clr
+           %bluC%clr
+           %bluD%clr
+           %blu %clr
+           %bluA%clr
+           %bluB%clr
+           %bluC%clr
       TABLE
     end
 
@@ -277,7 +387,7 @@ describe Rex::Text::Table do
         -------    ---  ----          -------                       ---------  -----  -------  ----  --------
         127.0.0.1       192.168.1.10  macOS Mojave (macOS 10.14.6)                    device
       TABLE
-      expect(tbl.to_s.lines).to all(have_maximum_width(120))
+      expect(tbl.to_s.lines).to all(have_maximum_display_width(120))
     end
 
     it 'makes use of all available space' do
@@ -323,7 +433,7 @@ describe Rex::Text::Table do
         1              10          ve (macOS
                                    10.14.6)
       TABLE
-      expect(tbl.to_s.lines).to all(have_maximum_width(80))
+      expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
     end
 
     context 'when word wrapping occurs' do
@@ -354,7 +464,7 @@ describe Rex::Text::Table do
           1   Lorem ipsum dolor sit amet, consecte  Pellentesque ac tellus lobortis, vol
               tur adipiscing elite                  utpat nibh sit amet
         TABLE
-        expect(tbl.to_s.lines).to all(have_maximum_width(80))
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
       it "Evenly allows columns to have specified widths" do
@@ -391,7 +501,7 @@ describe Rex::Text::Table do
                 olor sit amet, consectetur adipisci
                 ng elite
         TABLE
-        expect(tbl.to_s.lines).to all(have_maximum_width(80))
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
       it "handles multiple columns and rows" do
@@ -445,7 +555,7 @@ describe Rex::Text::Table do
             SESSION                           yes       The session to run this module o
                                                         n.
         TABLE
-        expect(tbl.to_s.lines).to all(have_maximum_width(80))
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
       it "handles strings in different encodings" do
@@ -513,7 +623,7 @@ describe Rex::Text::Table do
             �_��\u0010\u007F\u0011N���:T3A�                         四Ⅰ
             👍👍👍👍👍👍                                   hello 日本
         TABLE
-        expect(tbl.to_s.lines).to all(have_maximum_width(80))
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
       it "Wraps columns as well as values" do
@@ -548,18 +658,14 @@ describe Rex::Text::Table do
             Foo                                    Bar
             Foo                                    Bar
         TABLE
-        expect(tbl.to_s.lines).to all(have_maximum_width(80))
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
-      it "safely wordwraps cells that have colors present" do
-        skip(
-          "Functionality not implemented. Currently if there are colors present in a cell, the colors will break " \
-          "when word wrapping occurs"
-        )
+      it "safely wordwraps cells that have a single color/format across multiple lines" do
 
         options = {
           'Header' => 'Header',
-          'Indent' => 2,
+          'Indent' => 0,
           'Width' => 80,
           'Columns' => [
             'Blue Column',
@@ -572,17 +678,213 @@ describe Rex::Text::Table do
           "%blu#{'A' * 100}%clr",
           "%red#{'A' * 100}%clr",
         ]
+
         expect(tbl).to match_table <<~TABLE
           Header
           ======
 
-          Blue Column                            Red Column
-          -----------                            ----------
-          %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
-          %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
-          %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr     %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+          Blue Column                             Red Column
+          -----------                             ----------
+          %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+          %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+          %bluAAAAAAAAAAAAAAAAAAAAAAAA%clr                %redAAAAAAAAAAAAAAAAAAAAAAAA%clr
         TABLE
-        expect(tbl.to_s.lines).to all(have_maximum_width(80))
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
+      end
+
+      it "safely wordwraps cells that have a single color/format across a single line" do
+
+        options = {
+          'Header' => 'Header',
+          'Indent' => 0,
+          'Width' => 80,
+          'Columns' => [
+            'Blue Column',
+            'Red Column'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+        tbl << [
+          "#{'A' * 40}%bluA%clr#{'A' * 59}",
+          "#{'A' * 40}%redA%clr#{'A' * 59}",
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+          Blue Column                             Red Column
+          -----------                             ----------
+          AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+          AA%bluA%clrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  AA%redA%clrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+          AAAAAAAAAAAAAAAAAAAAAAAA                AAAAAAAAAAAAAAAAAAAAAAAA
+        TABLE
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
+      end
+
+      it "safely wordwraps cells that have a multiple color/format across a multiple line" do
+
+        options = {
+          'Header' => 'Header',
+          'Indent' => 0,
+          'Width' => 80,
+          'Columns' => [
+            'Blue Column',
+            'Red Column'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+        tbl << [
+          "%blu%undA%magA%yel#{'A' * 109}%clr",
+          "%red%undA%magA%yel#{'A' * 109}%clr",
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+          Blue Column                             Red Column
+          -----------                             ----------
+          %blu%undA%magA%yelAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %red%undA%magA%yelAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+          %yel%undAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %yel%undAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+          %yel%undAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr     %yel%undAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+        TABLE
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
+      end
+
+      it "verify that no formatting is added when not required" do
+
+        options = {
+          'Header' => 'Header',
+          'Indent' => 0,
+          'Width' => 80,
+          'Columns' => [
+            'Blue Column',
+            'Red Column'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+        tbl << [
+          "#{'A' * 40}",
+          "#{'A' * 40}",
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+          Blue Column                             Red Column
+          -----------                             ----------
+          AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+          AA                                      AA
+        TABLE
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
+      end
+
+      it "verify that formatting aligns correctly" do
+
+        options = {
+          'Header' => 'Header',
+          'Indent' => 0,
+          'Width' => 80,
+          'Columns' => [
+            'Blue Column',
+            'Red Column'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+        tbl << [
+          "%blu#{'A' * 40}%clr",
+          "%red#{'A' * 40}%clr",
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+          
+          Blue Column                             Red Column
+          -----------                             ----------
+          %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+          %bluAA%clr                                      %redAA%clr
+        TABLE
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
+      end
+
+
+      it "verify that formatting aligns correctly" do
+
+        options = {
+          'Header' => 'Header',
+          'Indent' => 0,
+          'Width' => 80,
+          'Columns' => [
+            'Blue Column',
+            'Red Column'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+        tbl << [
+          "%blu#{'A' * 40}%clr",
+          "%red#{'A' * 40}%clr",
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+          
+          Blue Column                             Red Column
+          -----------                             ----------
+          %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+          %bluAA%clr                                      %redAA%clr
+        TABLE
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
+      end
+
+
+      it "verify that formatting aligns correctly" do
+
+        options = {
+          'Indent' => 0,
+          'Width' => 1,
+          'Columns' => [
+            'Blue Column',
+            'Red Column'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+        tbl << %w[%bgyel%blu%bld%undAAA%clr %bgyel%blu%bld%undAAA%clr]
+
+        expect(tbl).to match_table <<~TABLE
+          B  R
+          l  e
+          u  d
+          e
+             C
+          C  o
+          o  l
+          l  u
+          u  m
+          m  n
+          n
+          -  -
+          %bgyel%blu%bld%undA%clr  %bgyel%blu%bld%undA%clr
+          %bgyel%blu%undA%clr  %bgyel%blu%undA%clr
+          %bgyel%blu%undA%clr  %bgyel%blu%undA%clr
+        TABLE
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(7))
       end
 
       it "ensures specific columns can disable wordwrapping" do
@@ -618,7 +920,7 @@ describe Rex::Text::Table do
         expect(tbl).to match_table <<~TABLE
           ...
         TABLE
-        expect(tbl.to_s.lines).to all(have_maximum_width(80))
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
       it "continues to work when it's not possible to fit all of the columns into the available width" do
@@ -659,25 +961,25 @@ describe Rex::Text::Table do
         #
         # For simplicity the first option is chosen, as in either scenario the user will have to resize their terminal.
         expect(tbl).to match_table <<~TABLE
-         Header
-         ======
+          Header
+          ======
 
-           N  V  R  D
-           a  a  e  e
-           m  l  q  s
-           e  u  u  c
-              e  i  r
-                 r  i
-                 e  p
-                 d  t
-                    i
-                    o
-                    n
-           -  -  -  -
-           A  A  Y  A
-           B  B  e  B
-           C  C  s  C
-           D  D     D
+            N  V  R  D
+            a  a  e  e
+            m  l  q  s
+            e  u  u  c
+               e  i  r
+                  r  i
+                  e  p
+                  d  t
+                     i
+                     o
+                     n
+            -  -  -  -
+            A  A  Y  A
+            B  B  e  B
+            C  C  s  C
+            D  D     D
         TABLE
       end
     end

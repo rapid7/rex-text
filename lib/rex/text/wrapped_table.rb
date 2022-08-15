@@ -390,6 +390,7 @@ protected
   # Converts a row to a string.
   #
   def row_to_s(row) # :nodoc:
+    row = row.each_with_index.map { |cell, index| style_table_field(cell, index) }
     optimal_widths = calculate_optimal_widths
     values_as_chunks = chunk_values(row, optimal_widths)
     chunks_to_s(values_as_chunks, optimal_widths)
@@ -401,17 +402,104 @@ protected
   # widths. For now it simply returns the string's length.
   #
   def display_width(str)
-    str.length
+    Rex::Text.display_width(str)
   end
 
+  #
+  # Takes a hash of color/format tags and converts them to a string
+  #
+  # @param [Hash] color_state
+  # @param [Integer] char_index
+  def color_code_string_for(color_state, char_index)
+    color_str = ""
+
+    unless char_index == 0
+      color_state.each do |_format, value|
+        if value.is_a?(Array)
+          color_str += value.join
+        else
+          color_str += value
+        end
+      end
+    end
+    color_str
+  end
+
+  #
+  # Takes an array of row values and an integer of optimal column width, loops over array and parses
+  # each string to gather color/formatting tags and handles those appropriately while not increasing the column width
+  #
+  # e.g. if a formatting "%blu" spans across multiple lines it needs to be added to the beginning off every following
+  # line, and each line will have a "%clr" added to the end of each row
+  #
+  # @param [Array] values
+  # @param [Integer] optimal_widths
   def chunk_values(values, optimal_widths)
+    color_state = {}
+
     # First split long strings into an array of chunks, where each chunk size is the calculated column width
     values_as_chunks = values.each_with_index.map do |value, idx|
       column_width = optimal_widths[idx]
-      value
-        .chars
-        .each_slice(column_width)
-        .map(&:join)
+      chunks = []
+      current_chunk = nil
+      chars = value.chars
+      char_index = 0
+
+      # Check if any color code(s) from previous the string need appended
+      while char_index < chars.length do
+        if current_chunk.nil?
+          previous_color_codes = color_code_string_for(color_state, char_index)
+          current_chunk = previous_color_codes
+        end
+
+        # Matches color codes and adds them to the color_state hash, uses color/formats purpose as key
+        # e.g. {:foreground=>"%blu"}
+        if chars[char_index] == '%'
+          if value[char_index..(char_index + 3)] == '%und' ||  value[char_index..(char_index + 3)] == '%bld'
+            color_state[:format] = []
+            color_state[:format] << [value[char_index..(char_index + 3)]]
+            current_chunk << value[char_index..(char_index + 3)]
+            char_index += 3
+          elsif value[char_index..(char_index + 3)] == '%clr'
+            color_state.clear
+            current_chunk << '%clr'
+            char_index += 3
+          elsif Rex::Text::Color::SUPPORTED_FORMAT_CODES.include?(value[char_index..(char_index + 5)])
+            color_state[:background] = value[char_index..(char_index + 5)] unless value[char_index..(char_index + 5)].end_with?('%clr')
+            current_chunk << value[char_index..(char_index + 5)]
+            char_index += 5
+          elsif Rex::Text::Color::SUPPORTED_FORMAT_CODES.include?(value[char_index..(char_index + 3)])
+            color_state[:foreground] = value[char_index..(char_index + 3)]
+            current_chunk << value[char_index..(char_index + 3)]
+            char_index += 3
+          end
+        else
+          current_chunk << chars[char_index]
+        end
+
+        # display_width will calculate the string's length ignoring color codes
+        if display_width(current_chunk) == column_width
+          unless color_state.empty?
+            current_chunk.insert(-1, '%clr') unless current_chunk.end_with?('%clr')
+          end
+          chunks.push(current_chunk)
+          current_chunk = nil
+        end
+        char_index += 1
+      end
+
+      if current_chunk != nil
+        unless color_state.empty?
+          current_chunk.insert(-1, '%clr') unless current_chunk.end_with?('%clr')
+        end
+
+        unless display_width(current_chunk) == 0
+          chunks.push(current_chunk)
+        end
+      end
+
+      color_state.clear
+      chunks
     end
 
     values_as_chunks
@@ -424,12 +512,13 @@ protected
       line = ""
       row_chunks.each_with_index do |chunk, idx|
         column_width = optimal_widths[idx]
+        chunk_length_with_padding = column_width + (chunk.to_s.length - display_width(chunk.to_s))
 
         if idx == 0
           line << ' ' * indent
         end
 
-        line << chunk.to_s.ljust(column_width)
+        line << chunk.to_s.ljust(chunk_length_with_padding)
         line << ' ' * cellpad
       end
 
@@ -519,13 +608,12 @@ protected
     str_cp
   end
 
-  def style_table_field(str, _idx)
-    str_cp = str.dup
+  def style_table_field(str, idx)
+    str_cp = str.clone
 
-    # Not invoking as color currently conflicts with the wrapping of tables
-    # colprops[idx]['Stylers'].each do |s|
-    #   str_cp = s.style(str_cp)
-    # end
+    colprops[idx]['Stylers'].each do |s|
+      str_cp = s.style(str_cp)
+    end
 
     str_cp
   end

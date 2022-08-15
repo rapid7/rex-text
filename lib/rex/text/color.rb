@@ -10,6 +10,7 @@ module Text
 #
 ###
 module Color
+  SUPPORTED_FORMAT_CODES = %w[%cya %red %grn %blu %yel %whi %mag %blk %dred %dgrn %dblu %dyel %dcya %dwhi %dmag %und %bld %clr %bgblu %bgyel %bggrn %bgmag %bgblk %bgred %bgcyn %bgwhi]
 
   AnsiAttributes =
     {

@@ -97,6 +97,17 @@ module Rex
         ( (" " * indent) + prepend + $& + append + 5.chr).gsub(/\n\005/,"\n").gsub(/\005/,"\n")}
     end
 
+    #
+    # Function that aims to calculate the display width of the given string.
+    # In the future this will be aware of East Asian characters having different display
+    # widths. For now it simply returns the string's length ignoring color codes.
+    #
+    # @param [String] str
+    # @return [Integer]
+    FORMAT_STRIP_REGEX = /#{Regexp.union(Rex::Text::Color::SUPPORTED_FORMAT_CODES.compact).source}/
+    def self.display_width(str)
+      str.gsub(FORMAT_STRIP_REGEX, '').length
+    end
 
     #
     # Convert 16-byte string to a GUID string
