@@ -39,11 +39,29 @@ module Rex
     end
 
     #
+    # Converts to a golang style array of bytes
+    #
+    def self.to_golang(str,name = "buf")
+      data = to_num(str).gsub(/\s+/, "").split(",") # Might be a better way of doing this....
+      return name + " := []byte{%s}" % [data.join(", ")] # Note, I've tried setting the size of the buffer manually to be more efficent it go, but better results are seen when using an undelcared array size.
+    end
+    
+    #
+    # Creates a golang style comment
+    #
+    def self.to_golang_comment(str,  wrap = DefaultWrap)
+      return "/*" + wordwrap(str, 0, wrap, '', ' * ') + "*/\n" 
+    end
+
+
+    #
     # Creates a c-style comment
     #
     def self.to_c_comment(str, wrap = DefaultWrap)
       return "/*\n" + wordwrap(str, 0, wrap, '', ' * ') + " */\n"
     end
+
+    
 
     #
     # Creates a javascript-style comment
