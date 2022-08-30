@@ -661,6 +661,38 @@ describe Rex::Text::Table do
         expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
+      it "safely wordwraps cells when an % symbol that is not associated with a color/format codes is present" do
+
+        options = {
+          'Header' => 'Header',
+          'Indent' => 0,
+          'Width' => 80,
+          'Columns' => [
+            'Blue Column',
+            'Red Column'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+        tbl << [
+          "%#{'A' * 49}%#{'A' * 49}",
+          "%#{'A' * 49}%#{'A' * 49}",
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+          Blue Column                             Red Column
+          -----------                             ----------
+          %AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  %AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+          AAAAAAAAAAAA%AAAAAAAAAAAAAAAAAAAAAAAAA  AAAAAAAAAAAA%AAAAAAAAAAAAAAAAAAAAAAAAA
+          AAAAAAAAAAAAAAAAAAAAAAAA                AAAAAAAAAAAAAAAAAAAAAAAA
+        TABLE
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
+      end
+
       it "safely wordwraps cells that have a single color/format across multiple lines" do
 
         options = {
@@ -757,7 +789,7 @@ describe Rex::Text::Table do
         expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
-      it "verify that no formatting is added when not required" do
+      it "safely wordwraps cells when there is no color/formatting codes present" do
 
         options = {
           'Header' => 'Header',
@@ -809,7 +841,7 @@ describe Rex::Text::Table do
         expect(tbl).to match_table <<~TABLE
           Header
           ======
-          
+
           Blue Column                             Red Column
           -----------                             ----------
           %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
@@ -841,7 +873,7 @@ describe Rex::Text::Table do
         expect(tbl).to match_table <<~TABLE
           Header
           ======
-          
+
           Blue Column                             Red Column
           -----------                             ----------
           %bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %redAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
@@ -851,6 +883,36 @@ describe Rex::Text::Table do
         expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
+      it 'supports dark color codes' do
+
+        options = {
+          'Header' => 'Header',
+          'Indent' => 0,
+          'Width' => 80,
+          'Columns' => [
+            'Blue Column',
+            'Red Column'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+        tbl << [
+          "%dyel#{'A' * 40}%clr",
+          "%dcya#{'A' * 40}%clr",
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+          Blue Column                             Red Column
+          -----------                             ----------
+          %dyelAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr  %dcyaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr
+          %dyelAA%clr                                      %dcyaAA%clr
+        TABLE
+
+        expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
+      end
 
       it "verify that formatting aligns correctly" do
 
@@ -880,8 +942,8 @@ describe Rex::Text::Table do
           n
           -  -
           %bgyel%blu%bld%undA%clr  %bgyel%blu%bld%undA%clr
-          %bgyel%blu%undA%clr  %bgyel%blu%undA%clr
-          %bgyel%blu%undA%clr  %bgyel%blu%undA%clr
+          %bgyel%blu%bld%undA%clr  %bgyel%blu%bld%undA%clr
+          %bgyel%blu%bld%undA%clr  %bgyel%blu%bld%undA%clr
         TABLE
 
         expect(tbl.to_s.lines).to all(have_maximum_display_width(7))
