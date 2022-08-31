@@ -127,52 +127,17 @@ module Rex
     # Converts a string to a hex version with wrapping support
     #
     def self.hexify(str, col = DefaultWrap, line_start = '', line_end = '', buf_start = '', buf_end = '')
-      output = buf_start
-      cur = 0
-      count = 0
-      new_line = true
-
-      # Go through each byte in the string
-      str.each_byte { |byte|
-        count += 1
-        append = ''
-
-        # If this is a new line, prepend with the
-        # line start text
-        if (new_line == true)
-          append << line_start
-          cur += line_start.length
-          new_line = false
+      ret = buf_start.dup
+      ret << line_start if ret.end_with?("\n")
+      str.each_char do |char|
+        # "\x##".length is 4, check if we're going over the wrap boundary
+        if (ret.split("\n").last || '').length + 4 + line_end.length > col
+          ret << "#{line_end}\n#{line_start}"
         end
-
-        # Append the hexified version of the byte
-        append << sprintf("\\x%.2x", byte)
-        cur    += append.length
-
-        # If we're about to hit the column or have gone past it,
-        # time to finish up this line
-        if ((line_start.length + cur + line_end.length >= col) or (cur + buf_end.length  >= col))
-          new_line = true
-          cur = 0
-
-          # If this is the last byte, use the buf_end instead of
-          # line_end
-          if (count == str.length)
-            append << buf_end + "\n"
-          else
-            append << line_end + "\n"
-          end
-        end
-
-        output << append
-      }
-
-      # If we were in the middle of a line, finish the buffer at this point
-      if (new_line == false)
-        output << buf_end + "\n"
+        ret << "\\x" << char.unpack('H*')[0]
       end
-
-      return output
+      ret << "\n" if ret.split("\n").last.length + buf_end.length > col
+      ret << "#{buf_end}\n"
     end
 
     #
