@@ -42,7 +42,7 @@ module Rex
     # Converts to a golang style array of bytes
     #
     def self.to_golang(str, wrap = DefaultWrap, name = "buf")
-      ret = " #{name} :=  []byte{"
+      ret = "#{name} :=  []byte{"
       i = -1;
       while (i += 1) < str.length
         ret << "\n" if i%(wrap/4) == 0
@@ -60,15 +60,12 @@ module Rex
       return "/*\n" + wordwrap(str, 0, wrap, '', '') + "*/\n" 
     end
 
-
     #
     # Creates a c-style comment
     #
     def self.to_c_comment(str, wrap = DefaultWrap)
       return "/*\n" + wordwrap(str, 0, wrap, '', ' * ') + " */\n"
     end
-
-    
 
     #
     # Creates a javascript-style comment
