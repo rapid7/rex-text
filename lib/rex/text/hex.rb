@@ -127,21 +127,22 @@ module Rex
     # Converts a string to a hex version with wrapping support
     #
     def self.hexify(str, col = DefaultWrap, line_start = '', line_end = '', buf_start = '', buf_end = '')
-      output	 = buf_start
-      cur	 = 0
-      count	 = 0
+      output = buf_start
+      cur = 0
+      count = 0
       new_line = true
 
       # Go through each byte in the string
       str.each_byte { |byte|
-        count  += 1
-        append	= ''
+        count += 1
+        append = ''
 
         # If this is a new line, prepend with the
         # line start text
         if (new_line == true)
-          append	 << line_start
-          new_line  = false
+          append << line_start
+          cur += line_start.length
+          new_line = false
         end
 
         # Append the hexified version of the byte
@@ -150,9 +151,9 @@ module Rex
 
         # If we're about to hit the column or have gone past it,
         # time to finish up this line
-        if ((cur + line_end.length >= col) or (cur + buf_end.length  >= col))
-          new_line  = true
-          cur	  = 0
+        if ((line_start.length + cur + line_end.length >= col) or (cur + buf_end.length  >= col))
+          new_line = true
+          cur = 0
 
           # If this is the last byte, use the buf_end instead of
           # line_end
