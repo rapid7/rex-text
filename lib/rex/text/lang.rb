@@ -39,6 +39,28 @@ module Rex
     end
 
     #
+    # Converts to a golang style array of bytes
+    #
+    def self.to_golang(str, wrap = DefaultWrap, name = "buf")
+      ret = "#{name} :=  []byte{"
+      i = -1;
+      while (i += 1) < str.length
+        ret << "\n" if i%(wrap/4) == 0
+        ret << "0x" << str[i].unpack("H*")[0] << ", "
+      end
+      ret = ret[0..ret.length-3] #cut off last comma
+      ret << " }\n"
+
+    end
+    
+    #
+    # Creates a golang style comment
+    #
+    def self.to_golang_comment(str,  wrap = DefaultWrap)
+      return "/*\n" + wordwrap(str, 0, wrap, '', '') + "*/\n" 
+    end
+
+    #
     # Creates a c-style comment
     #
     def self.to_c_comment(str, wrap = DefaultWrap)
