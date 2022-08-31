@@ -29,13 +29,14 @@ module Rex
 
     def self.to_csharp(str, wrap = DefaultWrap, name = "buf")
       ret = "byte[] #{name} = new byte[#{str.length}] {"
-      i = -1;
-      while (i += 1) < str.length
-        ret << "\n" if i%(wrap/4) == 0
-        ret << "0x" << str[i].unpack("H*")[0] << ","
+      str.each_char do |char|
+        # "0x##,".length is 5, check if we're going over the wrap boundary
+        ret << "\n" if ret.split("\n").last.length + 5 > wrap
+        ret << "0x" << char.unpack('H*')[0] << ","
       end
-      ret = ret[0..ret.length-2] #cut off last comma
-      ret << " };\n"
+      ret = ret[0..ret.length - 2] # cut off last comma
+      ret << "\n" if ret.split("\n").last.length + 2 > wrap
+      ret << "};\n"
     end
 
     #
@@ -43,21 +44,21 @@ module Rex
     #
     def self.to_golang(str, wrap = DefaultWrap, name = "buf")
       ret = "#{name} :=  []byte{"
-      i = -1;
-      while (i += 1) < str.length
-        ret << "\n" if i%(wrap/4) == 0
-        ret << "0x" << str[i].unpack("H*")[0] << ", "
+      str.each_char do |char|
+        # "0x##,".length is 5, check if we're going over the wrap boundary
+        ret << "\n" if ret.split("\n").last.length + 5 > wrap
+        ret << "0x" << char.unpack('H*')[0] << ","
       end
-      ret = ret[0..ret.length-3] #cut off last comma
-      ret << " }\n"
-
+      ret = ret[0..ret.length - 2] # cut off last comma
+      ret << "\n" if ret.split("\n").last.length + 2 > wrap
+      ret << "};\n"
     end
-    
+
     #
     # Creates a golang style comment
     #
     def self.to_golang_comment(str,  wrap = DefaultWrap)
-      return "/*\n" + wordwrap(str, 0, wrap, '', '') + "*/\n" 
+      return "/*\n" + wordwrap(str, 0, wrap, '', '') + "*/\n"
     end
 
     #
@@ -180,7 +181,6 @@ module Rex
     def self.to_psh_comment(str, wrap = DefaultWrap)
       return wordwrap(str, 0, wrap, '', '# ')
     end
-
 
   end
 end
