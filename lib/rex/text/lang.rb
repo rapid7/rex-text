@@ -34,7 +34,7 @@ module Rex
         ret << "\n" if ret.split("\n").last.length + 5 > wrap
         ret << "0x" << char.unpack('H*')[0] << ","
       end
-      ret = ret[0..ret.length - 2] # cut off last comma
+      ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
       ret << "\n" if ret.split("\n").last.length + 2 > wrap
       ret << "};\n"
     end
@@ -49,7 +49,7 @@ module Rex
         ret << "\n" if ret.split("\n").last.length + 5 > wrap
         ret << "0x" << char.unpack('H*')[0] << ","
       end
-      ret = ret[0..ret.length - 2] # cut off last comma
+      ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
       ret << "\n" if ret.split("\n").last.length + 2 > wrap
       ret << "};\n"
     end
