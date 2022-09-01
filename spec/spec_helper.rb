@@ -1,6 +1,10 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'rex/text'
 
+Dir['./spec/support/**/*.rb'].each do |f|
+  require f.sub(%r{\./spec/}, '')
+end
+
 RSpec.configure do |config|
   if ENV['CI']
     config.before(:example, :focus) { raise "Should not commit focused specs" }
