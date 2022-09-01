@@ -127,6 +127,11 @@ module Rex
     # Converts a string to a hex version with wrapping support
     #
     def self.hexify(str, col = DefaultWrap, line_start = '', line_end = '', buf_start = '', buf_end = '')
+      if col < line_start.length + 4 + line_end.length
+        # raise an exception
+        raise ArgumentError.new('insufficient column width')
+      end
+
       ret = buf_start.dup
       ret << line_start if ret.end_with?("\n")
       str.each_char do |char|
