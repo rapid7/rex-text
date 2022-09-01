@@ -3,43 +3,6 @@
 require 'spec_helper'
 require 'rex/text/wrapped_table'
 
-RSpec::Matchers.define :have_maximum_width do |expected|
-  match do |actual|
-    actual.length <= expected
-  end
-  failure_message do |actual|
-    "expected '#{actual}' to have a length than or equal to #{expected}, instead got #{actual.length}"
-  end
-end
-
-RSpec::Matchers.define :match_table do |expected|
-  diffable
-
-  match do |actual|
-    @actual = actual.to_s.strip
-    @expected = expected.to_s.strip
-
-    @actual == @expected
-  end
-
-  failure_message do |actual|
-    <<~MSG
-      Expected:
-      #{with_whitespace_highlighted(expected.to_s.strip)}
-
-      Received:
-      #{with_whitespace_highlighted(actual.to_s.strip)}
-
-      Raw Result:
-      #{actual.to_s}
-    MSG
-  end
-
-  def with_whitespace_highlighted(string)
-    string.lines.map { |line| "'#{line.gsub("\n", "")}'" }.join("\n")
-  end
-end
-
 describe Rex::Text::Table do
   let(:formatter) do
     clazz = Class.new do
