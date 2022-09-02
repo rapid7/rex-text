@@ -390,6 +390,7 @@ protected
   # Converts a row to a string.
   #
   def row_to_s(row) # :nodoc:
+    row = row.each_with_index.map { |cell, index| style_table_field(cell, index) }
     optimal_widths = calculate_optimal_widths
     values_as_chunks = chunk_values(row, optimal_widths)
     chunks_to_s(values_as_chunks, optimal_widths)
@@ -401,17 +402,134 @@ protected
   # widths. For now it simply returns the string's length.
   #
   def display_width(str)
-    str.length
+    Rex::Text.display_width(str)
   end
 
+  #
+  # Returns a string of color/formatting codes made up of the previously stored color_state
+  # e.g. if a `%blu` color code spans multiple lines this will return a string of `%blu` to be appended to
+  # the beginning of each row
+  #
+  # @param [Hash<String, String>] color_state tracks current color/formatting codes within table row
+  # @returns [String] Color code string such as `%blu%grn'
+  def color_code_string_for(color_state)
+    result = ''.dup
+    color_state.each do |_format, value|
+      if value.is_a?(Array)
+        result << value.uniq.join
+      else
+        result << value
+      end
+    end
+    result
+  end
+
+  # @returns [Hash<String, String>] The supported color codes from {Rex::Text::Color} grouped into sections
+  def color_code_groups
+    return @color_code_groups if @color_code_groups
+
+    @color_code_groups = {
+      foreground: %w[
+        %cya %red %grn %blu %yel %whi %mag %blk
+        %dred %dgrn %dblu %dyel %dcya %dwhi %dmag
+      ],
+      background: %w[
+        %bgblu %bgyel %bggrn %bgmag %bgblk %bgred %bgcyn %bgwhi
+      ],
+      decoration: %w[
+        %und %bld
+      ],
+      clear: %w[
+        %clr
+      ]
+    }
+
+    # Developer exception raised to ensure all color codes are accounted for. Verified via tests.
+    missing_color_codes = (Rex::Text::Color::SUPPORTED_FORMAT_CODES - @color_code_groups.values.flatten)
+    raise "Unsupported color codes #{missing_color_codes.join(', ')}" if missing_color_codes.any?
+
+    @color_code_groups
+  end
+
+  # Find the preceding color type and value of a given string
+  # @param [String] string A string such as '%bgyel etc'
+  # @returns [Array,nil] A tuple with the color type and value, or nil
+  def find_color_type_and_value(string)
+    color_code_groups.each do |color_type, color_values|
+      color_value = color_values.find { |color_value| string.start_with?(color_value) }
+      if color_value
+        return [color_type, color_value]
+      end
+    end
+
+    nil
+  end
+
+  #
+  # Takes an array of row values and an integer of optimal column width, loops over array and parses
+  # each string to gather color/formatting tags and handles those appropriately while not increasing the column width
+  #
+  # e.g. if a formatting "%blu" spans across multiple lines it needs to be added to the beginning off every following
+  # line, and each line will have a "%clr" added to the end of each row
+  #
+  # @param [Array<String>] values
+  # @param [Integer] optimal_widths
   def chunk_values(values, optimal_widths)
     # First split long strings into an array of chunks, where each chunk size is the calculated column width
     values_as_chunks = values.each_with_index.map do |value, idx|
+      color_state = {}
       column_width = optimal_widths[idx]
-      value
-        .chars
-        .each_slice(column_width)
-        .map(&:join)
+      chunks = []
+      current_chunk = nil
+      chars = value.chars
+      char_index = 0
+
+      # Check if any color code(s) from previous the string need appended
+      while char_index < chars.length do
+        # If a new chunk has started, start the chunk with any previous color codes
+        if current_chunk.nil? && color_state.any?
+          current_chunk = color_code_string_for(color_state)
+        end
+        current_chunk ||= ''.dup
+
+        # Check if the remaining chars start with a color code such as %blu
+        color_type_and_value = chars[char_index] == '%' ? find_color_type_and_value(chars[char_index..].join) : nil
+        if color_type_and_value.nil?
+          current_chunk << chars[char_index]
+          char_index += 1
+        else
+          color_type, color_code = color_type_and_value
+
+          if color_type == :clear
+            color_state.clear
+          elsif color_type == :decoration
+            # Multiple decorations can be enabled
+            color_state[:decoration] ||= []
+            color_state[:decoration] << color_code
+          else
+            # There can only be one foreground or background color
+            color_state[color_type] = color_code
+          end
+
+          current_chunk << color_code
+          char_index += color_code.length
+        end
+
+        # If we've reached the final character of the string, or need to word wrap
+        # it's time to push the current chunk, and start a new row. Also discard
+        # any values that are purely colors and have no display_width
+        is_final_character = char_index >= chars.length
+        display_width = display_width(current_chunk)
+        if (is_final_character && display_width != 0) || display_width == column_width
+          if color_state.any? && !current_chunk.end_with?('%clr')
+            current_chunk << '%clr'
+          end
+          chunks.push(current_chunk)
+          current_chunk = nil
+        end
+      end
+
+      chunks
     end
 
     values_as_chunks
@@ -424,12 +542,13 @@ protected
       line = ""
       row_chunks.each_with_index do |chunk, idx|
         column_width = optimal_widths[idx]
+        chunk_length_with_padding = column_width + (chunk.to_s.length - display_width(chunk.to_s))
 
         if idx == 0
           line << ' ' * indent
         end
 
-        line << chunk.to_s.ljust(column_width)
+        line << chunk.to_s.ljust(chunk_length_with_padding)
         line << ' ' * cellpad
       end
 
@@ -519,13 +638,12 @@ protected
     str_cp
   end
 
-  def style_table_field(str, _idx)
+  def style_table_field(str, idx)
     str_cp = str.dup
 
-    # Not invoking as color currently conflicts with the wrapping of tables
-    # colprops[idx]['Stylers'].each do |s|
-    #   str_cp = s.style(str_cp)
-    # end
+    colprops[idx]['Stylers'].each do |s|
+      str_cp = s.style(str_cp)
+    end
 
     str_cp
   end

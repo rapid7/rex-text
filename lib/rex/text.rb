@@ -98,6 +98,21 @@ module Rex
     end
 
 
+    # @return [Regexp] Matches a valid color code, i.e. "%blu,%yel,...etc"
+    COLOR_CODES_REGEX = /#{Regexp.union(Rex::Text::Color::SUPPORTED_FORMAT_CODES.compact).source}/
+    private_constant :COLOR_CODES_REGEX
+
+    #
+    # Function that aims to calculate the display width of the given string.
+    # In the future this will be aware of East Asian characters having different display
+    # widths. For now it simply returns the string's length ignoring color codes.
+    #
+    # @param [String] str
+    # @return [Integer]
+    def self.display_width(str)
+      str.gsub(COLOR_CODES_REGEX, '').length
+    end
+
     #
     # Convert 16-byte string to a GUID string
     #

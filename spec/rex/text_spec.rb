@@ -95,6 +95,49 @@ RSpec.describe Rex::Text do
       end
     end
 
+    describe ".display_width" do
+      it "verifies that display width calculates correct display width when no format codes are present" do
+        str = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        expect(described_class.display_width(str)).to eq(100)
+      end
+
+      it "verifies that display width calculates correct display width when format codes are present" do
+        str = "%bluAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr"
+        expect(described_class.display_width(str)).to eq(100)
+      end
+
+      it "verifies that display width calculates correct display width when format codes are chained together" do
+        str = "%bgyel%blu%bld%grn%undAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%clr"
+        expect(described_class.display_width(str)).to eq(100)
+      end
+
+      it "verifies that display width calculates correct display width when format codes are chained together with multiple seperate formatting instances" do
+        str = "%bgyel%blu%bld%undhello%clr %bgyel%blu%bld%undworld%clr"
+        expect(described_class.display_width(str)).to eq(11)
+      end
+
+      it "verifies that display width calculates correct display width when format codes are chained together with multiple seperate formatting instances" do
+        str = "%dgrnhello world%clr"
+        expect(described_class.display_width(str)).to eq(11)
+      end
+
+      it "verifies that display width calculates correct display width when emojis with modifiers are passed" do
+        # https://stackoverflow.com/questions/42778709/the-longest-character-in-utf-8
+        str = "🤦🏻‍♂️".force_encoding('UTF-8')
+
+        # For future travelers, this could technically be a width of 1, but is dependant on how the console renders it
+        expect(described_class.display_width(str)).to eq(5)
+      end
+
+      it "verifies that display width calculates correct display width when emojis with modifiers are passed" do
+        # https://stackoverflow.com/questions/42778709/the-longest-character-in-utf-8
+        str = "🤦🏻‍♂️".force_encoding('ASCII-8BIT')
+
+        # For future travelers, this could technically be a width of 1, but is dependant on how the console renders it
+        expect(described_class.display_width(str)).to eq(17)
+      end
+    end
+
     context ".gzip" do
       it "should return a properly formatted gzip file" do
         str = described_class.gzip("hi mom")

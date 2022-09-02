@@ -61,8 +61,73 @@ describe Rex::Text::Table do
 
       it "ignores the user preference when set to false" do
         expect(described_class.wrap_table?(disable_wrapped_table_options)).to be false
-      end      
+      end
     end
+  end
+
+  it 'should return a blank table as no search terms were matched' do
+    col_1_field = "A" * 5
+    col_2_field = "B" * 50
+    col_3_field = "C" * 15
+
+    options = {
+      'Header' => 'Header',
+      'SearchTerm' => 'jim|bob',
+      'Columns' => [
+        'Column 1',
+        'Column 2',
+        'Column 3'
+      ]
+    }
+
+    tbl = Rex::Text::Table.new(options)
+
+    tbl << [
+      col_1_field,
+      col_2_field,
+      col_3_field
+    ]
+
+    expect(tbl.to_s).to eql <<~TABLE
+      Header
+      ======
+
+      Column 1  Column 2                                            Column 3
+      --------  --------                                            --------
+    TABLE
+  end
+
+  it 'should return the row as the row contains a match for the search term' do
+    col_1_field = "jim"
+    col_2_field = "B" * 50
+    col_3_field = "C" * 15
+
+    options = {
+      'Header' => 'Header',
+      'SearchTerm' => 'jim|bob',
+      'Columns' => [
+        'Column 1',
+        'Column 2',
+        'Column 3'
+      ]
+    }
+
+    tbl = Rex::Text::Table.new(options)
+
+    tbl << [
+      col_1_field,
+      col_2_field,
+      col_3_field
+    ]
+
+    expect(tbl.to_s).to eql <<~TABLE
+      Header
+      ======
+
+      Column 1  Column 2                                            Column 3
+      --------  --------                                            --------
+      jim       BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
+    TABLE
   end
 
   it 'should space columns correctly' do
@@ -72,7 +137,6 @@ describe Rex::Text::Table do
 
     options = {
       'Header' => 'Header',
-      'SearchTerm' => ['jim', 'bob'],
       'Columns' => [
         'Column 1',
         'Column 2',
@@ -105,7 +169,6 @@ describe Rex::Text::Table do
 
     options = {
       'Header' => 'Header',
-      'SearchTerm' => ['jim', 'bob'],
       'Columns' => [
         'Column 1',
         'Column 2',
@@ -144,7 +207,6 @@ describe Rex::Text::Table do
 
     options = {
       'Header' => 'Header',
-      'SearchTerm' => ['jim', 'bob'],
       'Columns' => [
         'Column 1',
         'Column 2',
