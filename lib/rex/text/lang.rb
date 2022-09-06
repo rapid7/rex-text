@@ -65,6 +65,8 @@ module Rex
     # Converts to a nim style array of bytes
     #
     def self.to_nim(str, wrap = DefaultWrap, name = "buf")
+      raise ArgumentError.new('str can not be empty') if str.empty?
+
       ret = "var #{name}: array[#{str.length}, byte] = [\n"
       ret << "byte "
       str.each_char do |char|
@@ -72,8 +74,8 @@ module Rex
         ret << "\n" if ret.split("\n").last.length + 5 > wrap
         ret << "0x" << char.unpack('H*')[0] << ","
       end
-      ret = ret[0..ret.length - 2] # cut off last comma
-      ret << "\n" if ret.split("\n").last.length + 2 > wrap
+      ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
+      ret << "\n" if ret.split("\n").last.length + 1 > wrap
       ret << "]\n"
     end
 
@@ -81,7 +83,7 @@ module Rex
     # Creates a nim style comment
     #
     def self.to_nim_comment(str,  wrap = DefaultWrap)
-      return "#[\n" + wordwrap(str, 0, wrap, '', '') + "]#\n" 
+      return "#[\n" + wordwrap(str, 0, wrap, '', '') + "]#\n"
     end
 
     #
