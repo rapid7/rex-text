@@ -87,6 +87,27 @@ module Rex
     end
 
     #
+    # Converts to a Rust style array of bytes
+    #
+    def self.to_rust(str, wrap = DefaultWrap, name = "buf")
+      ret = "let #{name}: Vec<u8> = vec!["
+      str.each_char do |char|
+        # "0x##,".length is 5, check if we're going over the wrap boundary
+        ret << "\n" if ret.split("\n").last.length + 5 > wrap
+        ret << "0x" << char.unpack('H*')[0] << ","
+      end
+      ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
+      ret << "\n" if ret.split("\n").last.length + 2 > wrap
+      ret << "];\n"
+    
+    #
+    # Creates a Rust style comment
+    #
+    def self.to_rust_comment(str, wrap = DefaultWrap)
+      return "/*\n" + wordwrap(str, 0, wrap, '', ' * ') + " */\n"
+    end
+
+    #
     # Creates a c-style comment
     #
     def self.to_c_comment(str, wrap = DefaultWrap)
