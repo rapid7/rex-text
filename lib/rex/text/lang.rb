@@ -99,6 +99,7 @@ module Rex
       ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
       ret << "\n" if ret.split("\n").last.length + 2 > wrap
       ret << "];\n"
+    end
     
     #
     # Creates a Rust style comment
