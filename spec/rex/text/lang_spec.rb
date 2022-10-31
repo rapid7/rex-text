@@ -3,7 +3,7 @@ require 'spec_helper'
 
 RSpec.describe Rex::Text do
 
-  LANGUAGES = %w[ bash c csharp golang nim perl python ruby ]
+  LANGUAGES = %w[ bash c csharp golang nim rust perl python ruby ]
 
   context "to language methods should wrap at the specified columns" do
     LANGUAGES.each do |lang|
