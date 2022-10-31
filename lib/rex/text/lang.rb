@@ -90,7 +90,7 @@ module Rex
     # Converts to a Rust style array of bytes
     #
     def self.to_rust(str, wrap = DefaultWrap, name = "buf")
-      ret = "let #{name}: Vec<u8> = vec!["
+      ret = "let mut #{name}: Vec<u8> = vec!["
       str.each_char do |char|
         # "0x##,".length is 5, check if we're going over the wrap boundary
         ret << "\n" if ret.split("\n").last.length + 5 > wrap
