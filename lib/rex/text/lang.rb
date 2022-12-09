@@ -28,30 +28,14 @@ module Rex
     end
 
     def self.to_csharp(str, wrap = DefaultWrap, name = "buf")
-      ret = "byte[] #{name} = new byte[#{str.length}] {"
-      str.each_char do |char|
-        # "0x##,".length is 5, check if we're going over the wrap boundary
-        ret << "\n" if ret.split("\n").last.length + 5 > wrap
-        ret << "0x" << char.unpack('H*')[0] << ","
-      end
-      ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
-      ret << "\n" if ret.split("\n").last.length + 2 > wrap
-      ret << "};\n"
+      return numhexify(str, wrap, '', '',  "byte[] #{name} = new byte[#{str.length}] {", "};", ',')
     end
 
     #
     # Converts to a golang style array of bytes
     #
     def self.to_golang(str, wrap = DefaultWrap, name = "buf")
-      ret = "#{name} :=  []byte{"
-      str.each_char do |char|
-        # "0x##,".length is 5, check if we're going over the wrap boundary
-        ret << "\n" if ret.split("\n").last.length + 5 > wrap
-        ret << "0x" << char.unpack('H*')[0] << ","
-      end
-      ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
-      ret << "\n" if ret.split("\n").last.length + 2 > wrap
-      ret << "};\n"
+      return numhexify(str, wrap, '', '',  "#{name} :=  []byte{", "};", ',')
     end
 
     #
@@ -66,17 +50,7 @@ module Rex
     #
     def self.to_nim(str, wrap = DefaultWrap, name = "buf")
       raise ArgumentError.new('str can not be empty') if str.empty?
-
-      ret = "var #{name}: array[#{str.length}, byte] = [\n"
-      ret << "byte "
-      str.each_char do |char|
-        # "0x##,".length is 5, check if we're going over the wrap boundary
-        ret << "\n" if ret.split("\n").last.length + 5 > wrap
-        ret << "0x" << char.unpack('H*')[0] << ","
-      end
-      ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
-      ret << "\n" if ret.split("\n").last.length + 1 > wrap
-      ret << "]\n"
+      return numhexify(str, wrap, '', '',  "var #{name}: array[#{str.length}, byte] = [\nbyte ", "]", ',')
     end
 
     #
@@ -90,15 +64,7 @@ module Rex
     # Converts to a Rust style array of bytes
     #
     def self.to_rust(str, wrap = DefaultWrap, name = "buf")
-      ret = "let #{name}: [u8; #{str.length}] = ["
-      str.each_char do |char|
-        # "0x##,".length is 5, check if we're going over the wrap boundary
-        ret << "\n" if ret.split("\n").last.length + 5 > wrap
-        ret << "0x" << char.unpack('H*')[0] << ","
-      end
-      ret = ret[0..ret.length - 2] unless str.empty? # cut off last comma
-      ret << "\n" if ret.split("\n").last.length + 2 > wrap
-      ret << "];\n"
+      return numhexify(str, wrap, '', '',  "let #{name}: [u8; #{str.length}] = [", "];", ',')
     end
     
     #
