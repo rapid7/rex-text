@@ -1,5 +1,6 @@
 # -*- coding: binary -*-
 require 'spec_helper'
+require 'timeout'
 
 RSpec.describe Rex::Text do
 
@@ -12,6 +13,19 @@ RSpec.describe Rex::Text do
           wrap = 60
           lines = described_class.send("to_#{lang}", "A" * 100, wrap).split("\n")
           expect(lines).to all(have_maximum_width(wrap))
+        end
+      end
+    end
+  end
+
+  context "to language methods should complete almost instantaneously" do
+    LANGUAGES.each do |lang|
+      describe ".to_#{lang}" do
+        it "should not time out" do
+          wrap = 60
+          Timeout::timeout(5) do
+            described_class.send("to_#{lang}", "A" * 100000, wrap)
+          end
         end
       end
     end
