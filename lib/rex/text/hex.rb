@@ -127,22 +127,13 @@ module Rex
     # Converts a string to a hex version with wrapping support
     #
     def self.hexify(str, col = DefaultWrap, line_start = '', line_end = '', buf_start = '', buf_end = '')
-      if col < line_start.length + 4 + line_end.length
-        # raise an exception
-        raise ArgumentError.new('insufficient column width')
-      end
+      self.hexify_general(str, "\\x", col, line_start, line_end, buf_start, buf_end)
+    end
 
-      ret = buf_start.dup
-      ret << line_start if ret.end_with?("\n")
-      str.each_char do |char|
-        # "\x##".length is 4, check if we're going over the wrap boundary
-        if (ret.split("\n").last || '').length + 4 + line_end.length > col
-          ret << "#{line_end}\n#{line_start}"
-        end
-        ret << "\\x" << char.unpack('H*')[0]
-      end
-      ret << "\n" if ret.split("\n").last.length + buf_end.length > col
-      ret << "#{buf_end}\n"
+    #
+    # Converts a string to hex, with each character prefixed with 0x; with wrapping support
+    def self.numhexify(str, col = DefaultWrap, line_start = '', line_end = '', buf_start = '', buf_end = '', between = '')
+      self.hexify_general(str, "0x", col, line_start, line_end, buf_start, buf_end, between)
     end
 
     #
@@ -175,5 +166,35 @@ module Rex
       str.gsub!(regex) { |x| x[2,2].to_i(16).chr }
     end
 
+    private
+
+    #
+    # General-case method to handle both "\xAA\xBB\xCC" format and 0xAA,0xBB,0xCC format
+    #
+    def self.hexify_general(str, char_prefix, col = DefaultWrap, line_start = '', line_end = '', buf_start = '', buf_end = '', between='')
+      encoded_char_length = 2 + char_prefix.length + between.length
+      if col < line_start.length + encoded_char_length + line_end.length
+        # raise an exception
+        raise ArgumentError.new('insufficient column width')
+      end
+
+      ret = buf_start.dup
+      ret << line_start if ret.end_with?("\n")
+      last_newline = ret.rindex("\n") || -1
+      last_line_length = ret.length - last_newline - 1
+      str.each_char do |char|
+        # Check if we're going over the wrap boundary
+        if last_line_length + encoded_char_length + line_end.length > col
+          ret << "#{line_end}\n#{line_start}"
+          last_line_length = line_start.length
+        end
+        ret << char_prefix << char.unpack('H*')[0] << between
+        last_line_length += encoded_char_length
+      end
+      # Remove the last in-between characters, if required
+      ret = ret[0..ret.length - 1 - between.length] unless str.empty?
+      ret << "\n" if last_line_length + buf_end.length > col
+      ret << "#{buf_end}\n"
+    end
   end
 end

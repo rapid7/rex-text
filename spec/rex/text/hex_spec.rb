@@ -1,5 +1,6 @@
 # -*- coding: binary -*-
 require 'spec_helper'
+require 'timeout'
 
 RSpec.describe Rex::Text do
   describe ".hexify" do
@@ -16,6 +17,12 @@ RSpec.describe Rex::Text do
 
     it 'should convert the buffer to hex' do
       expect(described_class.hexify(Random.bytes(8))).to match(/(\\x[a-fA-F0-9]{2}){8}/)
+    end
+
+    it 'should finish instantaneously' do
+      Timeout::timeout(5) do
+        described_class.hexify(Random.bytes(800000))
+      end
     end
   end
 end
