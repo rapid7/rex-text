@@ -56,13 +56,13 @@ class WrappedTable
   #
   # 	The text to affix to the end of the table.
   #
-  # Sortindex
+  # SortIndex
   #
   #	The column to sort the table on, -1 disables sorting.
   #
   # ColProps
   #
-  # A hash specifying column MaxWidth, Stylers, and Formatters.
+  # A hash specifying column Width, Stylers, and Formatters.
   #
   def initialize(opts = {})
     self.header   = opts['Header']
@@ -85,10 +85,11 @@ class WrappedTable
     # Default column properties
     self.columns.length.times { |idx|
       self.colprops[idx] = {}
-      self.colprops[idx]['MaxWidth'] = self.columns[idx].length
+      self.colprops[idx]['Width'] = nil
       self.colprops[idx]['WordWrap'] = true
       self.colprops[idx]['Stylers'] = []
       self.colprops[idx]['Formatters'] = []
+      self.colprops[idx]['ColumnStylers'] = []
     }
 
     # ensure all our internal state gets updated with the given rows by
@@ -112,20 +113,28 @@ class WrappedTable
   # Converts table contents to a string.
   #
   def to_s
+    sort_rows
+
+    # Loop over and style columns
+    styled_columns = columns.map.with_index { |col, idx| style_table_column_headers(col, idx) }
+    # Loop over and style rows that are visible to the user
+    styled_rows = rows.select { |row| row_visible(row) }
+                      .map! { |row| row.map.with_index { |cell, index| style_table_field(cell, index) } }
+
+    optimal_widths = calculate_optimal_widths(styled_columns, styled_rows)
+
     str  = prefix.dup
     str << header_to_s || ''
-    str << columns_to_s || ''
+    str << columns_to_s(styled_columns, optimal_widths) || ''
     str << hr_to_s || ''
 
-    sort_rows
-    rows.each { |row|
-      if (is_hr(row))
+    styled_rows.each { |row|
+      if is_hr(row)
         str << hr_to_s
       else
-        str << row_to_s(row) if row_visible(row)
+        str << row_to_s(row, optimal_widths)
       end
     }
-
     str << postfix
 
     return str
@@ -184,11 +193,6 @@ class WrappedTable
     end
     formatted_fields = fields.map.with_index { |field, idx|
       field = format_table_field(field, idx)
-
-      if (colprops[idx]['MaxWidth'] < display_width(field))
-        old = colprops[idx]['MaxWidth']
-        colprops[idx]['MaxWidth'] = display_width(field)
-      end
 
       field
     }
@@ -333,7 +337,7 @@ protected
   #
   def row_visible(row)
     return true if self.scterm.nil?
-    row_to_s(row).match(self.scterm)
+    row.join(' ').match(self.scterm)
   end
 
   #
@@ -354,8 +358,7 @@ protected
   #
   # Converts the columns to a string.
   #
-  def columns_to_s # :nodoc:
-    optimal_widths = calculate_optimal_widths
+  def columns_to_s(columns, optimal_widths) # :nodoc:
     values_as_chunks = chunk_values(columns, optimal_widths)
     result = chunks_to_s(values_as_chunks, optimal_widths)
 
@@ -389,9 +392,7 @@ protected
   #
   # Converts a row to a string.
   #
-  def row_to_s(row) # :nodoc:
-    row = row.each_with_index.map { |cell, index| style_table_field(cell, index) }
-    optimal_widths = calculate_optimal_widths
+  def row_to_s(row, optimal_widths) # :nodoc:
     values_as_chunks = chunk_values(row, optimal_widths)
     chunks_to_s(values_as_chunks, optimal_widths)
   end
@@ -567,12 +568,26 @@ protected
     without_extra_column
   end
 
-  def calculate_optimal_widths
-    # Calculate the minimum width each column can be. This is dictated by the user.
+  def calculate_optimal_widths(styled_columns, styled_rows)
+    total_columns = self.colprops.length
+    # Calculate the display width metadata, i.e. the size of the longest strings in the table
+    display_width_metadata = Array.new(total_columns) { {} }
+    [[styled_columns], styled_rows].each do |group|
+      group.each do |row|
+        row.each.with_index do |cell, column_index|
+          metadata = display_width_metadata[column_index]
+          cell_display_width = display_width(cell)
+          if cell_display_width > (metadata[:max_display_width] || 0)
+            metadata[:max_display_width] = cell_display_width
+          end
+        end
+      end
+    end
+
+    # Calculate the sizes set by the user
     user_influenced_column_widths = colprops.map do |colprop|
-      if colprop['WordWrap'] == false
-        colprop['MaxWidth']
-        raise 'Not implemented'
+      if colprop['Width']
+        colprop['Width']
       else
         nil
       end
@@ -583,15 +598,16 @@ protected
     remaining_column_calculations = user_influenced_column_widths.select(&:nil?).count
 
     # Calculate the initial widths, which will need an additional refinement to reallocate surplus space
-    naive_optimal_width_calculations = colprops.map.with_index do |colprop, index|
+    naive_optimal_width_calculations = display_width_metadata.map.with_index do |display_size, index|
       shared_column_width = available_space / [remaining_column_calculations, 1].max
       remaining_column_calculations -= 1
 
+      # Preference the user defined widths first
       if user_influenced_column_widths[index]
         { width: user_influenced_column_widths[index], wrapped: false }
-      elsif colprop['MaxWidth'] < shared_column_width
-        available_space -= colprop['MaxWidth']
-        { width: colprop['MaxWidth'], wrapped: false }
+      elsif display_size[:max_display_width] < shared_column_width
+        available_space -= display_size[:max_display_width]
+        { width: display_size[:max_display_width], wrapped: false }
       else
         available_space -= shared_column_width
         { width: shared_column_width, wrapped: true }
@@ -608,7 +624,7 @@ protected
       revisiting_column_counts -= 1
 
       if naive_width[:wrapped]
-        max_width = colprops[index]['MaxWidth']
+        max_width = display_width_metadata[index][:max_display_width]
         if max_width < (naive_width[:width] + additional_column_width)
           surplus_width -= max_width - naive_width[:width]
           max_width
@@ -638,6 +654,16 @@ protected
     str_cp
   end
 
+  def style_table_column_headers(str, idx)
+    str_cp = str.dup
+
+    colprops[idx]['ColumnStylers'].each do |s|
+      str_cp = s.style(str_cp)
+    end
+
+    str_cp
+  end
+
   def style_table_field(str, idx)
     str_cp = str.dup
 
@@ -652,4 +678,3 @@ end
 
 end
 end
-

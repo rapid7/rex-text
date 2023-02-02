@@ -110,6 +110,8 @@ module Rex
     # @param [String] str
     # @return [Integer]
     def self.display_width(str)
+      return 0 if str.nil?
+
       str.gsub(COLOR_CODES_REGEX, '').length
     end
 

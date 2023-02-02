@@ -147,12 +147,12 @@ describe Rex::Text::Table do
         col_3_field
       ]
 
-      expect(tbl.to_s).to eql <<~TABLE
+      expect(tbl.to_s).to match_table <<~TABLE
       Header
       ======
 
-      Column 1  Column 2                                            Column 3
-      --------  --------                                            --------
+      Column 1  Column 2  Column 3
+      --------  --------  --------
       TABLE
     end
 
@@ -179,7 +179,7 @@ describe Rex::Text::Table do
         col_3_field
       ]
 
-      expect(tbl.to_s).to eql <<~TABLE
+      expect(tbl.to_s).to match_table <<~TABLE
       Header
       ======
 
@@ -219,6 +219,153 @@ describe Rex::Text::Table do
         --------  --------                                            --------
         AAAAA     BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
       TABLE
+    end
+
+    context 'when using arrow indicators' do
+      let(:empty_column_header_styler) do
+        clazz = Class.new do
+          def style(_str)
+            ""
+          end
+        end
+
+        clazz.new
+      end
+
+      let(:arrow_styler) do
+        clazz = Class.new do
+          def style(str)
+            str.to_s == 'true' ? '=>' : '  '
+          end
+        end
+
+        clazz.new
+      end
+
+      it 'should support column stylers and row stylers' do
+        col_2_field = "B" * 50
+        col_3_field = "C" * 15
+
+        options = {
+          'Header' => 'Header',
+          'Columns' => [
+            'Column 1',
+            'Column 2',
+            'Column 3'
+          ],
+          'SortIndex' => -1,
+          'ColProps' => {
+            'Column 1' => {
+              'ColumnStylers' => [empty_column_header_styler],
+              'Stylers' => [arrow_styler],
+              'Width' => 2
+            },
+            'Column 2' => {
+              'Formatters' => [formatter],
+              'ColumnStylers' => [styler]
+            }
+          }
+        }
+
+        tbl = Rex::Text::Table.new(options)
+
+        tbl << [
+          true,
+          col_2_field,
+          col_3_field
+        ]
+
+        tbl << [
+          false,
+          col_2_field,
+          col_3_field
+        ]
+
+        tbl << [
+          true,
+          col_2_field,
+          col_3_field
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+              %bluColumn 2%clr                                                              Column 3
+              --------                                                              --------
+          =>  IHAVEBEENFORMATTEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
+              IHAVEBEENFORMATTEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
+          =>  IHAVEBEENFORMATTEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
+        TABLE
+        expect(tbl.to_csv).to eq <<~TABLE
+          Column 1,Column 2,Column 3
+          "true","IHAVEBEENFORMATTEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB","CCCCCCCCCCCCCCC"
+          "false","IHAVEBEENFORMATTEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB","CCCCCCCCCCCCCCC"
+          "true","IHAVEBEENFORMATTEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB","CCCCCCCCCCCCCCC"
+        TABLE
+      end
+
+      it 'should handle small widths' do
+        col_2_field = 'B' * 12
+        col_3_field = 'C' * 5
+
+        options = {
+          'Header' => 'Header',
+          'Width' => 1,
+          'Columns' => [
+            'Column 1',
+            'Column 2',
+            'Column 3'
+          ],
+          'SortIndex' => -1,
+          'ColProps' => {
+            'Column 1' => {
+              'ColumnStylers' => [empty_column_header_styler],
+              'Stylers' => [arrow_styler],
+              'Width' => 2
+            },
+          }
+        }
+
+        tbl = Rex::Text::Table.new(options)
+
+        tbl << [
+          true,
+          col_2_field,
+          col_3_field
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+              C  C
+              o  o
+              l  l
+              u  u
+              m  m
+              n  n
+
+              2  3
+              -  -
+          =>  B  C
+              B  C
+              B  C
+              B  C
+              B  C
+              B
+              B
+              B
+              B
+              B
+              B
+              B
+        TABLE
+        expect(tbl.to_csv).to eq <<~TABLE
+          Column 1,Column 2,Column 3
+          "true","BBBBBBBBBBBB","CCCCC"
+        TABLE
+      end
     end
 
     it 'should apply field formatters correctly and increase column length' do
