@@ -82,9 +82,9 @@ describe Rex::Text::Table do
 
       expect(tbl.to_csv).to eql <<~TABLE.force_encoding("UTF-8")
         Name,Value
-        "hello world","hello world"
-        "Administratör","Administratör"
         "Administrator’s Shares","Administrator’s Shares"
+        "Administratör","Administratör"
+        "hello world","hello world"
         "这是中文这是中文这是中文这是中文","这是中文这是中文这是中文这是中文"
         "�_��\u0010\u007F\u0011N���:T3A�","四Ⅰ"
         "👍👍👍👍👍👍","hello 日本"

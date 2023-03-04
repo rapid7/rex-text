@@ -144,6 +144,8 @@ class WrappedTable
   # Converts table contents to a csv
   #
   def to_csv
+    sort_rows
+
     str = ''
     str << ( columns.join(",") + "\n" )
     rows.each { |row|
