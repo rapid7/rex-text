@@ -28,15 +28,15 @@ module Rex
     # Creates a comma separated list of dwords
     #
     def self.to_dword(str, wrap = DefaultWrap)
-      code = str
+      code = str.dup.force_encoding('ASCII-8BIT')
       alignnr = str.length % 4
       if (alignnr > 0)
         code << "\x00" * (4 - alignnr)
       end
       codevalues = Array.new
-      code.split("").each_slice(4) do |chars4|
+      code.chars.each_slice(4) do |chars4|
         chars4 = chars4.join("")
-        dwordvalue = chars4.unpack('*V')
+        dwordvalue = chars4.unpack('V')
         codevalues.push(dwordvalue[0])
       end
       buff = ""

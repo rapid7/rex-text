@@ -22,7 +22,7 @@ module Rex
       # the regex the first time it is used and never check again.  Since we
       # want to know how many to capture on every instance, we do it this
       # way.
-      return str.unpack('H*')[0].gsub(Regexp.new(".{#{count * 2}}", nil, 'n')) { |s| prefix + s }
+      return str.unpack('H*')[0].gsub(Regexp.new(".{#{count * 2}}", Regexp::NOENCODING)) { |s| prefix + s }
     end
 
     #
@@ -40,7 +40,7 @@ module Rex
     #   their escaped hex representation
     def self.to_hex_ascii(str, prefix = "\\x", count = 1, suffix=nil)
       raise ::RuntimeError, "unable to chunk into #{count} byte chunks" if ((str.length % count) > 0)
-      return str.unpack('H*')[0].gsub(Regexp.new(".{#{count * 2}}", nil, 'n')) { |s|
+      return str.unpack('H*')[0].gsub(Regexp.new(".{#{count * 2}}", Regexp::NOENCODING)) { |s|
         (0x20..0x7e) === s.to_i(16) ? s.to_i(16).chr : prefix + s + suffix.to_s
       }
     end
