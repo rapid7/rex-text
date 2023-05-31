@@ -46,6 +46,22 @@ module Rex
     end
 
     #
+    # Converts to a masm style array of bytes
+    #
+    def self.to_mas(str, wrap = DefaultWrap, name = "")
+      raise ArgumentError.new('str can not be empty') if str.empty?
+      a = to_hex(str)
+      a.gsub!(/\\x/, '')
+      a.gsub!(/(.{2})/, '\1h,')
+      a.gsub!(/(.{32})/, '\1\n')
+      a.gsub!('\n', "\n")
+      a.gsub!(/^(.*),$/, 'DB \1')
+      a.gsub!(/([a-f].h)/, '0\1')
+      a.sub!(/^/, 'shellcode ')
+      return a
+    end
+
+    #
     # Converts to a nim style array of bytes
     #
     def self.to_nim(str, wrap = DefaultWrap, name = "buf")
