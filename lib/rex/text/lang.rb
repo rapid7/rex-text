@@ -48,7 +48,7 @@ module Rex
     #
     # Converts to a masm style array of bytes
     #
-    def self.to_mas(str, wrap = DefaultWrap, name = "")
+    def self.to_masm(str, wrap = DefaultWrap, name = "")
       raise ArgumentError.new('str can not be empty') if str.empty?
       a = to_hex(str)
       a.gsub!(/\\x/, '')
