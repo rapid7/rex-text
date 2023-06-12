@@ -65,7 +65,7 @@ module Rex
     # Creates a masm style comment
     #
     def self.to_masm_comment(str,  wrap = DefaultWrap)
-      return ";" + wordwrap(str, 0, wrap, '', '') + "\n"
+      return wordwrap(str, 0, wrap, '', '; ')
     end
 
     #
