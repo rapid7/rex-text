@@ -23,10 +23,6 @@ RSpec.describe Rex::Text do
       "buf :=  []byte{0x41,0x41,0x41,\n0x41,0x41,0x41,0x41,0x41,0x41,\n0x41};\n"
     end
 
-    let(:expected_masm) do
-      "shellcode DB 41h,41h,41h,41h,41h,41h,41h,41h\nDB 41h,41h"
-    end
-
     let(:expected_nim) do
       "var buf: array[10, byte] = [\nbyte 0x41,0x41,0x41,0x41,0x41,\n0x41,0x41,0x41,0x41,0x41]\n"
     end
@@ -67,9 +63,30 @@ RSpec.describe Rex::Text do
       expect(output).to eq(expected_golang)
     end
 
-    it "masm is as expected" do
-      output = described_class.to_masm('A' * 10, 30)
-      expect(output).to eq(expected_masm)
+    describe '#to_masm' do
+      [
+        {
+          args: ['A' * 10, 80],
+          expected: "buf DB 41h,41h,41h,41h,41h,41h,41h,41h,41h,41h\n"
+        },
+        {
+          args: ['A' * 10, 30],
+          expected: "buf DB 41h,41h,41h,41h,41h\n    DB 41h,41h,41h,41h,41h\n"
+        },
+        {
+          args: [(0..24).to_a.pack("C*"), 50],
+          expected: "buf DB 00h,01h,02h,03h,04h,05h,06h,07h,08h,09h\n    DB 0ah,0bh,0ch,0dh,0eh,0fh,10h,11h,12h,13h\n    DB 14h,15h,16h,17h,18h\n"
+        },
+        {
+          args: [('A'..'Z').to_a.join, 50],
+          expected: "buf DB 41h,42h,43h,44h,45h,46h,47h,48h,49h,4ah\n    DB 4bh,4ch,4dh,4eh,4fh,50h,51h,52h,53h,54h\n    DB 55h,56h,57h,58h,59h,5ah\n"
+        }
+      ].each do |test|
+        it "formats #{test} as expected" do
+          output = described_class.to_masm(*test[:args])
+          expect(output).to eq(test[:expected])
+        end
+      end
     end
 
     it "nim is as expected" do

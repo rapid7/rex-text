@@ -171,8 +171,8 @@ module Rex
     #
     # General-case method to handle both "\xAA\xBB\xCC" format and 0xAA,0xBB,0xCC format
     #
-    def self.hexify_general(str, char_prefix, col = DefaultWrap, line_start = '', line_end = '', buf_start = '', buf_end = '', between='')
-      encoded_char_length = 2 + char_prefix.length + between.length
+    def self.hexify_general(str, char_prefix, col = DefaultWrap, line_start = '', line_end = '', buf_start = '', buf_end = '', between='', char_suffix: '')
+      encoded_char_length = 2 + char_prefix.length + char_suffix.length + between.length
       if col < line_start.length + encoded_char_length + line_end.length
         # raise an exception
         raise ArgumentError.new('insufficient column width')
@@ -188,7 +188,7 @@ module Rex
           ret << "#{line_end}\n#{line_start}"
           last_line_length = line_start.length
         end
-        ret << char_prefix << char.unpack('H*')[0] << between
+        ret << char_prefix << char.unpack('H*')[0] << char_suffix << between
         last_line_length += encoded_char_length
       end
       # Remove the last in-between characters, if required
