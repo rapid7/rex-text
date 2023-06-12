@@ -4,7 +4,7 @@ require 'timeout'
 
 RSpec.describe Rex::Text do
 
-  LANGUAGES = %w[ bash c csharp golang nim rust perl python ruby ]
+  LANGUAGES = %w[ bash c csharp golang masm nim rust perl python ruby ]
 
   describe "languages match expected output" do
     let(:expected_bash) do

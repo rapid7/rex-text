@@ -62,6 +62,13 @@ module Rex
     end
 
     #
+    # Creates a masm style comment
+    #
+    def self.to_masm_comment(str,  wrap = DefaultWrap)
+      return ";\n" + wordwrap(str, 0, wrap, '', '') + "\n"
+    end
+
+    #
     # Converts to a nim style array of bytes
     #
     def self.to_nim(str, wrap = DefaultWrap, name = "buf")
