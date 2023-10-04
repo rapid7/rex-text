@@ -1,0 +1,15 @@
+---
+info:
+  title: Rex Text
+  description: Rex library for text generation and manipulation
+  x-cortex-git:
+    github:
+      alias: r7org
+      repository: rapid7/rex-text
+  x-cortex-tag: rex-text
+  x-cortex-type: service
+  x-cortex-domain-parents:
+  - tag: metasploit
+openapi: 3.0.1
+servers:
+- url: "/"
