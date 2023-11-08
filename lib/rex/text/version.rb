@@ -1,5 +1,5 @@
 module Rex
   module Text
-    VERSION = "0.2.55"
+    VERSION = "0.2.56"
   end
 end
