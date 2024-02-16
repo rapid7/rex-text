@@ -39,12 +39,12 @@ describe Rex::Text::Table do
         expect(described_class.wrap_table?(default_table_options)).to be true
       end
 
-      it "returns the user preference when set to true" do
+      it "ignores the user preference when set to true" do
         expect(described_class.wrap_table?(enable_wrapped_table_options)).to be true
       end
 
-      it "returns the user preference when set to false" do
-        expect(described_class.wrap_table?(disable_wrapped_table_options)).to be false
+      it "ignores the user preference when set to false" do
+        expect(described_class.wrap_table?(disable_wrapped_table_options)).to be true
       end
     end
 

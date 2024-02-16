@@ -34,6 +34,14 @@ describe Rex::Text::Table do
     allow(Rex::Text::Table).to receive(:wrap_table?).with(anything).and_return(true)
   end
 
+  before(:each) do
+    described_class.wrap_tables!
+  end
+
+  after(:each) do
+    described_class.unwrap_tables!
+  end
+
   describe "#to_csv" do
     it "handles strings in different encodings" do
       options = {
@@ -219,6 +227,82 @@ describe Rex::Text::Table do
         --------  --------                                            --------
         AAAAA     BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
       TABLE
+    end
+
+    context 'when values have trailing and preceding whitespae' do
+      it 'strips values by default' do
+        whitespace = "     "
+        col_1_field = whitespace + "A" * 5 + whitespace
+        col_2_field = whitespace + "B" * 50 + whitespace
+        col_3_field = whitespace + "C" * 15 + whitespace
+
+        options = {
+          'Header' => 'Header',
+          'Columns' => [
+            'Column 1',
+            'Column 2',
+            'Column 3'
+          ]
+        }
+
+        tbl = Rex::Text::Table.new(options)
+
+        tbl << [
+          col_1_field,
+          col_2_field,
+          col_3_field
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+          Column 1  Column 2                                            Column 3
+          --------  --------                                            --------
+          AAAAA     BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB  CCCCCCCCCCCCCCC
+        TABLE
+      end
+
+      it 'allows conditional stripping of values' do
+        whitespace = "     "
+        col_1_field = whitespace + "A" * 5 + whitespace
+        col_2_field = whitespace + "B" * 50 + whitespace
+        col_3_field = whitespace + "C" * 15 + whitespace
+
+        options = {
+          'Header' => 'Header',
+          'Columns' => [
+            'Column 1',
+            'Column 2',
+            'Column 3'
+          ],
+          'ColProps' => {
+            'Column 1' => {
+              'Strip' => true
+            },
+            'Column 2' => {
+              'Strip' => false
+            }
+          }
+        }
+
+        tbl = Rex::Text::Table.new(options)
+
+        tbl << [
+          col_1_field,
+          col_2_field,
+          col_3_field
+        ]
+
+        expect(tbl).to match_table <<~TABLE
+          Header
+          ======
+
+          Column 1  Column 2                                                      Column 3
+          --------  --------                                                      --------
+          AAAAA          BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB       CCCCCCCCCCCCCCC
+        TABLE
+      end
     end
 
     context 'when using arrow indicators' do
@@ -439,6 +523,41 @@ describe Rex::Text::Table do
         Column 1  Column 2                                            Column 3
         --------  --------                                            --------
         AAAAA     %bluBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB%clr  CCCCCCCCCCCCCCC
+      TABLE
+    end
+
+    it 'allows wordwrapping to be disabled globally' do
+      options = {
+        'Header' => 'Header',
+        'Width' => 3,
+        'WordWrap' => false,
+        'Columns' => [
+          'Column 1',
+          'Column 2',
+          'Column 3'
+        ],
+        'ColProps' => {
+          'Column 2' => {
+            'Stylers' => [styler]
+          }
+        }
+      }
+
+      tbl = Rex::Text::Table.new(options)
+
+      tbl << [
+        "A" * 5,
+        "ABC ABCD ABC" * 1,
+        "C" * 5
+      ]
+
+      expect(tbl).to match_table <<~TABLE
+        Header
+        ======
+
+        Column 1  Column 2      Column 3
+        --------  --------      --------
+        AAAAA     %bluABC ABCD ABC%clr  CCCCC
       TABLE
     end
 
@@ -773,7 +892,7 @@ describe Rex::Text::Table do
         expect(tbl.to_s.lines).to all(have_maximum_display_width(80))
       end
 
-      it "Wraps columns as well as values" do
+      it "wraps columns as well as values" do
         options = {
           'Header' => 'Header',
           'Indent' => 2,

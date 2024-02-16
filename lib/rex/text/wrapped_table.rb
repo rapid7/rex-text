@@ -72,6 +72,7 @@ class WrappedTable
     self.rows     = []
 
     self.width    = opts['Width']   || ::IO.console&.winsize&.[](1) || ::BigDecimal::INFINITY
+    self.word_wrap = opts.fetch('WordWrap', true)
     self.indent   = opts['Indent']  || 0
     self.cellpad  = opts['CellPad'] || 2
     self.prefix   = opts['Prefix']  || ''
@@ -87,6 +88,7 @@ class WrappedTable
       self.colprops[idx] = {}
       self.colprops[idx]['Width'] = nil
       self.colprops[idx]['WordWrap'] = true
+      self.colprops[idx]['Strip'] = true
       self.colprops[idx]['Stylers'] = []
       self.colprops[idx]['Formatters'] = []
       self.colprops[idx]['ColumnStylers'] = []
@@ -328,7 +330,7 @@ class WrappedTable
 
   attr_accessor :header, :headeri # :nodoc:
   attr_accessor :columns, :rows, :colprops # :nodoc:
-  attr_accessor :width, :indent, :cellpad # :nodoc:
+  attr_accessor :width, :word_wrap, :indent, :cellpad # :nodoc:
   attr_accessor :prefix, :postfix # :nodoc:
   attr_accessor :sort_index, :sort_order, :scterm # :nodoc:
 
@@ -478,6 +480,8 @@ protected
   # @param [Array<String>] values
   # @param [Integer] optimal_widths
   def chunk_values(values, optimal_widths)
+    return values.map { |value| [value] } unless word_wrap
+
     # First split long strings into an array of chunks, where each chunk size is the calculated column width
     values_as_chunks = values.each_with_index.map do |value, idx|
       color_state = {}
@@ -586,6 +590,8 @@ protected
       end
     end
 
+    return display_width_metadata.map { |metadata| metadata[:max_display_width] } unless word_wrap
+
     # Calculate the sizes set by the user
     user_influenced_column_widths = colprops.map do |colprop|
       if colprop['Width']
@@ -647,7 +653,8 @@ protected
   end
 
   def format_table_field(str, idx)
-    str_cp = str.to_s.encode('UTF-8', invalid: :replace, undef: :replace).strip
+    str_cp = str.to_s.encode('UTF-8', invalid: :replace, undef: :replace)
+    str_cp = str_cp.strip if colprops[idx]['Strip']
 
     colprops[idx]['Formatters'].each do |f|
       str_cp = f.format(str_cp)
