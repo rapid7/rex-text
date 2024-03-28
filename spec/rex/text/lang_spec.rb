@@ -4,7 +4,7 @@ require 'timeout'
 
 RSpec.describe Rex::Text do
 
-  LANGUAGES = %w[ bash c csharp golang masm nim rust perl python ruby ]
+  LANGUAGES = %w[ bash c csharp golang masm nim rust perl python ruby zig ]
 
   describe "languages match expected output" do
     let(:expected_bash) do
@@ -41,6 +41,10 @@ RSpec.describe Rex::Text do
 
     let(:expected_ruby) do
       "buf = \n\"\\x41\\x41\\x41\\x41\\x41\\x41\" +\n\"\\x41\\x41\\x41\\x41\"\n"
+    end
+
+    let(:expected_zig) do
+      "\nconst buf: []const u8 = &.{\n0x41,0x41,0x41,0x41,0x41,0x41,\n0x41,0x41,0x41,0x41};\n"
     end
 
     it "bash is as expected" do
@@ -112,6 +116,11 @@ RSpec.describe Rex::Text do
     it "ruby is as expected" do
       output = described_class.to_ruby('A' * 10, 30)
       expect(output).to eq(expected_ruby)
+    end
+
+    it "zig is as expected" do
+      output = described_class.to_zig('A' * 10, 30)
+      expect(output).to eq(expected_zig)
     end
   end
 

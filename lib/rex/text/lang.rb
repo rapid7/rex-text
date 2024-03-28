@@ -217,5 +217,19 @@ module Rex
       return wordwrap(str, 0, wrap, '', '# ')
     end
 
+    #
+    # Converts to a zig style array of bytes
+    #
+    def self.to_zig(str, wrap = DefaultWrap, name = "buf")
+      return numhexify(str, wrap, '', '',  "\nconst #{name}: []const u8 = \&.{\n", "};", ',')
+    end
+
+    #
+    # Creates a zig-style comment
+    #
+    def self.to_zig_comment(str, wrap = DefaultWrap)
+      return wordwrap(str, 0, wrap, '', '// ')
+    end
+
   end
 end
