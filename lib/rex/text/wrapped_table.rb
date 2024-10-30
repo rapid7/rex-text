@@ -71,7 +71,8 @@ class WrappedTable
     # updated below if we got a "Rows" option
     self.rows     = []
 
-    self.width    = opts['Width']   || ::IO.console&.winsize&.[](1) || ::BigDecimal::INFINITY
+    self.width    = opts['Width']   || ::IO.console&.winsize&.[](1)
+    self.width = ::BigDecimal::INFINITY if !self.width || self.width == 0
     self.word_wrap = opts.fetch('WordWrap', true)
     self.indent   = opts['Indent']  || 0
     self.cellpad  = opts['CellPad'] || 2
