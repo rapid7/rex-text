@@ -101,37 +101,52 @@ describe Rex::Text::Table do
     end
   end
 
-  describe "#to_s" do
-    describe 'width calculation' do
-      let(:default_options) do
-        {
-          'Header' => 'Header',
-          'Columns' => [
-            'Column 1',
-            'Column 2',
-            'Column 3'
-          ]
-        }
-      end
-      let(:table) { Rex::Text::Table.new(options) }
+  describe '#width' do
+    let(:default_options) do
+      {
+        'Header' => 'Header',
+        'Columns' => [
+          'Column 1',
+          'Column 2',
+          'Column 3'
+        ]
+      }
+    end
+    let(:table) { Rex::Text::Table.new(options) }
 
-      context 'when a width is specified' do
-        let(:options) { default_options.merge({ 'Width' =>  100 }) }
-        it { expect(table.width).to eql 100 }
-      end
-
-      context 'when a width is not specified' do
-        let(:options) { default_options }
-        it { expect(table.width).to eql 180 }
-      end
-
-      context 'when the IO.console API is not available' do
-        let(:options) { default_options }
-        let(:mock_io_console) { nil }
-        it { expect(table.width).to eql BigDecimal::INFINITY }
-      end
+    context 'when a width is specified' do
+      let(:options) { default_options.merge({ 'Width' =>  100 }) }
+      it { expect(table.width).to eql 100 }
     end
 
+    context 'when a width is not specified' do
+      let(:options) { default_options }
+      it { expect(table.width).to eql 180 }
+    end
+
+    context 'when the IO.console API is not available' do
+      let(:options) { default_options }
+      let(:mock_io_console) { nil }
+      it { expect(table.width).to eql BigDecimal::INFINITY }
+    end
+
+    # When running in the context of Docker the console width and height can be 0
+    context 'when the IO.console API returns 0 width and height' do
+      let(:options) { default_options }
+      let(:mock_window_size_rows) { 0 }
+      let(:mock_window_size_columns) { 0 }
+
+      it { expect(table.width).to eql BigDecimal::INFINITY }
+    end
+
+    context 'when a width is set as 0 is will be overidden to infinity' do
+      let(:options) { default_options.merge({ 'Width' =>  0 }) }
+
+      it { expect(table.width).to eql BigDecimal::INFINITY }
+    end
+  end
+
+  describe "#to_s" do
     it 'should return a blank table as no search terms were matched' do
       col_1_field = "A" * 5
       col_2_field = "B" * 50
