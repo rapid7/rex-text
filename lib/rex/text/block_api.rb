@@ -15,7 +15,7 @@ module Rex
     #
     # @return [String] The hash of the mod/fun pair in string format
     def self.block_api_hash(mod, func, iv: 0)
-      unicode_mod = (mod.upcase + "\x00").unpack('C*').pack('v*')
+      unicode_mod = (mod.upcase).unpack('C*').pack('v*')
       mod_hash = self.ror13_hash(unicode_mod, iv: iv)
       fun_hash = self.ror13_hash(func + "\x00", iv: mod_hash)
       "0x#{(fun_hash & 0xFFFFFFFF).to_s(16)}"
