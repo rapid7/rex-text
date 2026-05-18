@@ -166,25 +166,6 @@ module Rex
       str.gsub!(regex) { |x| x[2,2].to_i(16).chr }
     end
 
-    #
-    # Converts a string to a comma-separated hex byte sequence suitable for
-    # use in assembly `db` directives.
-    #
-    # @example
-    #   Rex::Text.to_hex_cstring("hi")                  # => "0x68, 0x69, 0x00"
-    #   Rex::Text.to_hex_cstring("")                    # => "0x00"
-    #   Rex::Text.to_hex_cstring("hi", nullbyte: false) # => "0x68, 0x69"
-    #   Rex::Text.to_hex_cstring("", nullbyte: false)   # => ""
-    #
-    # @param str [String] The string to convert
-    # @param nullbyte [Boolean] Whether to append a null terminator (default: true)
-    # @return [String] Comma-separated hex bytes
-    def self.to_hex_cstring(str, nullbyte: true)
-      bytes = str.to_s.bytes
-      bytes.push(0) if nullbyte
-      bytes.map { |byte| '0x%02x' % byte }.join(', ')
-    end
-
     private
 
     #
