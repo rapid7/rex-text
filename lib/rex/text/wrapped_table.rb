@@ -95,11 +95,8 @@ class WrappedTable
       self.colprops[idx]['ColumnStylers'] = []
     }
 
-    # ensure all our internal state gets updated with the given rows by
-    # using add_row instead of just adding them to self.rows.  See #3825.
-    opts['Rows'].each { |row| add_row(row) } if opts['Rows']
-
-    # Merge in options
+    # Merge in options. This has to happen before any rows are added because
+    # properties such as Strip and Formatters are applied as a row is stored.
     if (opts['ColProps'])
       opts['ColProps'].each_key { |col|
         idx = self.columns.index(col)
@@ -110,6 +107,9 @@ class WrappedTable
       }
     end
 
+    # ensure all our internal state gets updated with the given rows by
+    # using add_row instead of just adding them to self.rows.  See #3825.
+    opts['Rows'].each { |row| add_row(row) } if opts['Rows']
   end
 
   #
@@ -654,8 +654,8 @@ protected
   end
 
   def format_table_field(str, idx)
-    str_cp = str.to_s.encode('UTF-8', invalid: :replace, undef: :replace)
-    str_cp = str_cp.strip if colprops[idx]['Strip']
+    encoded = str.to_s.encode('UTF-8', invalid: :replace, undef: :replace)
+    str_cp = colprops[idx]['Strip'] ? encoded.strip : encoded
 
     colprops[idx]['Formatters'].each do |f|
       str_cp = f.format(str_cp)

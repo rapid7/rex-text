@@ -237,5 +237,71 @@ describe Rex::Text::Table do
     TABLE
   end
 
+  describe 'the Strip column property' do
+    let(:options) do
+      {
+        'Header' => 'Header',
+        'Columns' => %w[Column1 Column2],
+        'SortIndex' => -1
+      }
+    end
+
+    it 'strips leading and trailing whitespace by default' do
+      tbl = Rex::Text::Table.new(options)
+      tbl << ['  padded  ', 'other']
+
+      expect(tbl.rows).to eql [['padded', 'other']]
+    end
+
+    it 'keeps leading whitespace when the column opts out' do
+      tbl = Rex::Text::Table.new(
+        options.merge('ColProps' => { 'Column1' => { 'Strip' => false } })
+      )
+      tbl << ['  indented', 'other']
+
+      expect(tbl.rows).to eql [['  indented', 'other']]
+    end
+
+    it 'still strips the columns which did not opt out' do
+      tbl = Rex::Text::Table.new(
+        options.merge('ColProps' => { 'Column1' => { 'Strip' => false } })
+      )
+      tbl << ['  indented', '  other  ']
+
+      expect(tbl.rows).to eql [['  indented', 'other']]
+    end
+
+    it 'applies to rows supplied to the constructor' do
+      tbl = Rex::Text::Table.new(
+        options.merge(
+          'ColProps' => { 'Column1' => { 'Strip' => false } },
+          'Rows' => [['  indented', 'other']]
+        )
+      )
+
+      expect(tbl.rows).to eql [['  indented', 'other']]
+    end
+
+    it 'renders the preserved indentation and keeps later columns aligned' do
+      tbl = Rex::Text::Table.new(
+        options.merge('ColProps' => { 'Column1' => { 'Strip' => false } })
+      )
+      tbl << ['tcp', 'open']
+      tbl << ["'- http", 'open']
+      tbl << ["   '- jenkins", 'open']
+
+      expect(tbl.to_s).to eql <<~TABLE
+        Header
+        ======
+
+        Column1        Column2
+        -------        -------
+        tcp            open
+        '- http        open
+           '- jenkins  open
+      TABLE
+    end
+  end
+
 end
 

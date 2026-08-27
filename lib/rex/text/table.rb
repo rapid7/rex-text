@@ -90,7 +90,7 @@ class Table
   #
   # ColProps
   #
-  # A hash specifying column MaxWidth, Stylers, and Formatters.
+  # A hash specifying column MaxWidth, Strip, Stylers, and Formatters.
   #
   def initialize(opts = {})
     self.header   = opts['Header']
@@ -114,15 +114,13 @@ class Table
     self.columns.length.times { |idx|
       self.colprops[idx] = {}
       self.colprops[idx]['MaxWidth'] = self.columns[idx].length
+      self.colprops[idx]['Strip'] = true
       self.colprops[idx]['Stylers'] = []
       self.colprops[idx]['Formatters'] = []
     }
 
-    # ensure all our internal state gets updated with the given rows by
-    # using add_row instead of just adding them to self.rows.  See #3825.
-    opts['Rows'].each { |row| add_row(row) } if opts['Rows']
-
-    # Merge in options
+    # Merge in options.  This has to happen before any rows are added, because
+    # properties such as Strip and Formatters are applied as a row is stored.
     if (opts['ColProps'])
       opts['ColProps'].each_key { |col|
         idx = self.columns.index(col)
@@ -133,6 +131,9 @@ class Table
       }
     end
 
+    # ensure all our internal state gets updated with the given rows by
+    # using add_row instead of just adding them to self.rows.  See #3825.
+    opts['Rows'].each { |row| add_row(row) } if opts['Rows']
   end
 
   #
@@ -210,8 +211,8 @@ class Table
       raise RuntimeError, 'Invalid number of columns!'
     end
     formatted_fields = fields.map.with_index { |field, idx|
-      # Remove whitespace and ensure String format
-      field = format_table_field(field.to_s.strip, idx)
+      # Ensure String format, and remove whitespace unless the column opted out
+      field = format_table_field(field, idx)
 
       if (colprops[idx]['MaxWidth'] < field.to_s.length)
         old = colprops[idx]['MaxWidth']
@@ -471,7 +472,8 @@ protected
   end
 
   def format_table_field(str, idx)
-    str_cp = str.clone
+    str_cp = str.to_s.dup
+    str_cp = str_cp.strip if colprops[idx]['Strip']
 
     colprops[idx]['Formatters'].each do |f|
       str_cp = f.format(str_cp)
