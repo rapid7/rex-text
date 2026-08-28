@@ -30,6 +30,7 @@ require 'rex/text/xor'
 require 'rex/text/color'
 require 'rex/text/table'
 require 'rex/text/wrapped_table'
+require 'rex/text/hierarchy_table'
 
 module Rex
 
