@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -11,7 +12,7 @@ module Rex
     #
     def self.to_num(str, wrap = DefaultWrap)
       code = str.unpack('C*')
-      buff = ""
+      buff = +""
       0.upto(code.length-1) do |byte|
         if(byte % 15 == 0) and (buff.length > 0)
           buff << "\r\n"
@@ -39,7 +40,7 @@ module Rex
         dwordvalue = chars4.unpack('V')
         codevalues.push(dwordvalue[0])
       end
-      buff = ""
+      buff = +""
       0.upto(codevalues.length-1) do |byte|
         if(byte % 8 == 0) and (buff.length > 0)
           buff << "\r\n"

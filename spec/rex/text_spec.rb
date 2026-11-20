@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 require 'spec_helper'
 
 RSpec.describe Rex::Text do
@@ -123,7 +124,7 @@ RSpec.describe Rex::Text do
 
       it "verifies that display width calculates correct display width when emojis with modifiers are passed" do
         # https://stackoverflow.com/questions/42778709/the-longest-character-in-utf-8
-        str = "🤦🏻‍♂️".force_encoding('UTF-8')
+        str = (+"🤦🏻‍♂️").force_encoding('UTF-8')
 
         # For future travelers, this could technically be a width of 1, but is dependant on how the console renders it
         expect(described_class.display_width(str)).to eq(5)
@@ -131,7 +132,7 @@ RSpec.describe Rex::Text do
 
       it "verifies that display width calculates correct display width when emojis with modifiers are passed" do
         # https://stackoverflow.com/questions/42778709/the-longest-character-in-utf-8
-        str = "🤦🏻‍♂️".force_encoding('ASCII-8BIT')
+        str = (+"🤦🏻‍♂️").force_encoding('ASCII-8BIT')
 
         # For future travelers, this could technically be a width of 1, but is dependant on how the console renders it
         expect(described_class.display_width(str)).to eq(17)
@@ -149,7 +150,7 @@ RSpec.describe Rex::Text do
 
     context ".ungzip" do
       it "should return an uncompressed string" do
-        gzip  = "\x1f\x8b\x08\x00"
+        gzip  = +"\x1f\x8b\x08\x00"
         gzip << "\x00" * 6
         gzip << "\xcb\xc8\x54\xc8\xcd\xcf\x05\x00\x68\xa4\x1c\xf0\x06\x00\x00\x00"
         expect(described_class.ungzip(gzip)).to eq("hi mom")

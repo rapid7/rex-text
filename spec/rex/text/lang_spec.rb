@@ -1,10 +1,11 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 require 'spec_helper'
 require 'timeout'
 
 RSpec.describe Rex::Text do
 
-  LANGUAGES = %w[ bash c csharp golang masm nim rust perl python ruby zig ]
+  LANGUAGES = %w[ bash c csharp golang masm nim rust perl python ruby zig ].freeze
 
   describe "languages match expected output" do
     let(:expected_bash) do

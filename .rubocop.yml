@@ -1,0 +1,20 @@
+require:
+  - rubocop-performance
+
+AllCops:
+  NewCops: disable
+  SuggestExtensions: false
+  TargetRubyVersion: 2.7
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+Style/RedundantFreeze:
+  Enabled: true
+
+Style/MutableConstant:
+  Enabled: true
+
+Performance/UnfreezeString:
+  Enabled: true

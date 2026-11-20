@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -37,7 +38,7 @@ module Rex
     def self.to_mixed_case_array(str)
       letters = str.each_char.map { |l| [l.downcase, l.upcase] }
       (1 << str.size).times.map do |i| 
-        this_str = ""
+        this_str = +""
         ("%0#{str.size}b" % i).each_char.map(&:to_i).each_with_index do |d,i|
           this_str << letters[i][d]
         end
@@ -52,7 +53,7 @@ module Rex
       set = ["\x09", "\x20", "\x0d", "\x0a"]
       str.gsub(/\s+/) { |s|
         len = rand(50)+2
-        buf = ''
+        buf = +''
         while (buf.length < len)
           buf << set.sample
         end

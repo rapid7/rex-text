@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -52,7 +53,7 @@ module Rex
     # @param width [Integer] Number of bytes to convert before adding a newline
     # @param base [Integer] The base address of the dump
     def self.to_hex_dump(str, width=16, base=nil)
-      buf = ''
+      buf = +''
       idx = 0
       cnt = 0
       snl = false

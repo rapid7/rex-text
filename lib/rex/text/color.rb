@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
 module Text
 
@@ -10,7 +11,7 @@ module Text
 #
 ###
 module Color
-  SUPPORTED_FORMAT_CODES = %w[%cya %red %grn %blu %yel %whi %mag %blk %dred %dgrn %dblu %dyel %dcya %dwhi %dmag %und %bld %clr %bgblu %bgyel %bggrn %bgmag %bgblk %bgred %bgcyn %bgwhi]
+  SUPPORTED_FORMAT_CODES = %w[%cya %red %grn %blu %yel %whi %mag %blk %dred %dgrn %dblu %dyel %dcya %dwhi %dmag %und %bld %clr %bgblu %bgyel %bggrn %bgmag %bgblk %bgred %bgcyn %bgwhi].freeze
 
   AnsiAttributes =
     {
@@ -31,7 +32,7 @@ module Color
       'magenta'    => 35,   'on_magenta' => 45,
       'cyan'       => 36,   'on_cyan'    => 46,
       'white'      => 37,   'on_white'   => 47
-    }
+    }.freeze
 
   #
   # Return a string with ANSI codes substituted.  Derived from code

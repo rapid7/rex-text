@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 
 module Rex::Text
   # XOR a string against a variable-length key

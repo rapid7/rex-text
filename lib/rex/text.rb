@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 require 'rex/text/version'
 require 'digest/md5'
 require 'digest/sha1'
@@ -62,7 +63,7 @@ module Rex
     AllChars     = [*(0x00 .. 0xff)].pack("C*")
     Punctuation  = ( [*(0x21 .. 0x2f)] + [*(0x3a .. 0x3F)] + [*(0x5b .. 0x60)] + [*(0x7b .. 0x7e)] ).flatten.pack("C*")
 
-    DefaultPatternSets = [ Rex::Text::UpperAlpha, Rex::Text::LowerAlpha, Rex::Text::Numerals ]
+    DefaultPatternSets = [ Rex::Text::UpperAlpha, Rex::Text::LowerAlpha, Rex::Text::Numerals ].freeze
 
     #
     # Returns the raw string
@@ -81,7 +82,7 @@ module Rex
     # @param prefix [String]
     # @return [String] The escaped octal version of +str+
     def self.to_octal(str, prefix = "\\")
-      octal = ""
+      octal = +""
       str.each_byte { |b|
         octal << "#{prefix}#{b.to_s 8}"
       }
@@ -99,7 +100,7 @@ module Rex
 
 
     # @return [Regexp] Matches a valid color code, i.e. "%blu,%yel,...etc"
-    COLOR_CODES_REGEX = /#{Regexp.union(Rex::Text::Color::SUPPORTED_FORMAT_CODES.compact).source}/
+    COLOR_CODES_REGEX = /#{Regexp.union(Rex::Text::Color::SUPPORTED_FORMAT_CODES.compact).source}/.freeze
     private_constant :COLOR_CODES_REGEX
 
     #
@@ -183,8 +184,8 @@ module Rex
     def self.load_codepage()
       return if (!@@codepage_map_cache.nil?)
       file = File.join(File.dirname(__FILE__),'codepage.map')
-      page = ''
-      name = ''
+      page = +''
+      name = +''
       map = {}
       File.open(file).each { |line|
         next if line =~ /^#/

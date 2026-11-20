@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -20,7 +21,7 @@ module Rex
     #   unique
     # @see pattern_offset
     def self.pattern_create(length, sets = nil)
-      buf = ''
+      buf = +''
       offsets = []
 
       # Make sure there's something in sets even if we were given an explicit nil
@@ -44,7 +45,7 @@ module Rex
     # structures. Note that the supplied sets should never contain duplicate bytes, or
     # else it can become impossible to measure the offset accurately.
     def self.patt2(len, sets = nil)
-      buf = ""
+      buf = +""
       counter = []
       sets ||= [ UpperAlpha, LowerAlpha, Numerals ]
       len ||= len.to_i

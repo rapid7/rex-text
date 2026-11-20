@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -7,12 +8,12 @@ module Rex
     # without hanging the underlying calls that we historically rely upon.
 
 
-    TLDs = ['com', 'net', 'org', 'gov', 'biz', 'edu']
+    TLDs = ['com', 'net', 'org', 'gov', 'biz', 'edu'].freeze
     States = ["AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DE", "FL", "GA", "HI",
               "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN",
               "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH",
               "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA",
-              "WI", "WV", "WY"]
+              "WI", "WV", "WY"].freeze
 
     Countries = ["AF", "AX", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM",
                  "AW", "AC", "AU", "AT", "AZ", "BS", "BH", "BB", "BD", "BY", "BE", "BZ",
@@ -34,7 +35,7 @@ module Rex
                  "LK", "SH", "PM", "SD", "SR", "SJ", "SZ", "SE", "CH", "SY", "TW", "TJ",
                  "TZ", "TH", "TG", "TK", "TO", "TT", "TN", "TR", "TM", "TC", "TV", "UG",
                  "UA", "AE", "UK", "US", "UM", "UY", "SU", "UZ", "VU", "VA", "VE", "VN",
-                 "VG", "VI", "WF", "EH", "YE", "YU", "ZM", "ZW"]
+                 "VG", "VI", "WF", "EH", "YE", "YU", "ZM", "ZW"].freeze
 
     #
     # Most 100 common surnames, male/female names in the U.S. (http://names.mongabay.com/)
@@ -56,7 +57,7 @@ module Rex
       "stewart", "taylor", "thomas", "thompson", "torres", "turner", "walker",
       "ward", "washington", "watson", "white", "williams", "wilson", "wood",
       "wright", "young"
-    ]
+    ].freeze
 
     Names_Male = [
       "aaron", "adam", "alan", "albert", "andrew", "anthony", "antonio",
@@ -73,7 +74,7 @@ module Rex
       "ronald", "roy", "russell", "ryan", "samuel", "scott", "sean", "shawn",
       "stephen", "steve", "steven", "terry", "thomas", "timothy", "todd",
       "victor", "walter", "wayne", "william", "willie"
-    ]
+    ].freeze
 
     Names_Female = [
       "alice", "amanda", "amy", "andrea", "angela", "ann", "anna", "anne",
@@ -90,17 +91,17 @@ module Rex
       "paula", "phyllis", "rachel", "rebecca", "robin", "rose", "ruby", "ruth",
       "sandra", "sara", "sarah", "sharon", "shirley", "stephanie", "susan",
       "tammy", "teresa", "theresa", "tina", "virginia", "wanda"
-    ]
+    ].freeze
 
     Func_Verb = [
       "get", "set", "put", "describe", "acquire", "release", "initialize", "free",
       "init", "find", "list", "create", "destroy"
-    ]
+    ].freeze
 
     Func_Subj = [
       "file", "directory", "dir", "address", "addr", "process", "proc", "user",
       "privileges", "priv", "attribute", "attr", "mutex", "handle", "type"
-    ]
+    ].freeze
 
     # Generates a random character.
     def self.rand_char(bad, chars = AllChars)
@@ -260,7 +261,7 @@ module Rex
 
     # Generate a random mail address
     def self.rand_mail_address
-      mail_address = ''
+      mail_address = +''
       mail_address << Rex::Text.rand_name
       mail_address << '.'
       mail_address << Rex::Text.rand_surname
