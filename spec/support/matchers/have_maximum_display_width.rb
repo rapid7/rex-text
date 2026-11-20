@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec::Matchers.define :have_maximum_display_width do |expected|
   match do |actual|
     Rex::Text.display_width(actual) <= expected

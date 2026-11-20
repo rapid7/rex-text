@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -78,7 +79,7 @@ module Rex
       raise RuntimeError, "Gzip support is not present." if (!zlib_present?)
       raise RuntimeError, "Invalid gzip compression level" if (level < 1 or level > 9)
 
-      s = ""
+      s = +""
       s.force_encoding('ASCII-8BIT') if s.respond_to?(:encoding)
       gz = Zlib::GzipWriter.new(StringIO.new(s, 'wb'), level)
       gz << str
@@ -94,7 +95,7 @@ module Rex
     def self.ungzip(str)
       raise RuntimeError, "Gzip support is not present." if (!zlib_present?)
 
-      s = ""
+      s = +""
       s.force_encoding('ASCII-8BIT') if s.respond_to?(:encoding)
       gz = Zlib::GzipReader.new(StringIO.new(str, 'rb'))
       s << gz.read

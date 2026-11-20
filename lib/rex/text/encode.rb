@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -29,7 +30,7 @@ module Rex
         when 'hex-noslashes'
           return str.gsub(noslashes) { |s| Rex::Text.to_hex(s, '%') }
         when 'hex-random'
-          res = ''
+          res = +''
           str.each_byte do |c|
             b = c.chr
             res << ((rand(2) == 0) ?
@@ -44,7 +45,7 @@ module Rex
         when 'u-noslashes'
           return str.gsub(noslashes) { |s| Rex::Text.to_hex(Rex::Text.to_unicode(s, 'uhwtfms'), '%u', 2) }
         when 'u-random'
-          res = ''
+          res = +''
           str.each_byte do |c|
             b = c.chr
             res << ((rand(2) == 0) ?

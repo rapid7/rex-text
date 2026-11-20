@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -58,7 +59,7 @@ module Rex
           case mode
             when 'all'
               return str.gsub(/./){ |a|
-                out = ''
+                out = +''
                 if 'a' != '+'
                   out = encode_base64(to_unicode(a, 'utf-16be')).gsub(/[=\r\n]/, '')
                 end
@@ -66,7 +67,7 @@ module Rex
               }
             else
               return str.gsub(/[^\n\r\t\ A-Za-z0-9\'\(\),-.\/\:\?]/){ |a|
-                out = ''
+                out = +''
                 if a != '+'
                   out = encode_base64(to_unicode(a, 'utf-16be')).gsub(/[=\r\n]/, '')
                 end
@@ -79,7 +80,7 @@ module Rex
           end
 
           if size >= 2 and size <= 7
-            string = ''
+            string = +''
             str.each_byte { |a|
               if (a < 21 || a > 0x7f) || mode != ''
                 # ugh.	turn a single byte into the binary representation of it, in array form
@@ -145,7 +146,7 @@ module Rex
         when 'uhwtfms' # suggested name from HD :P
           load_codepage()
 
-          string = ''
+          string = +''
           # overloading mode as codepage
           if mode == ''
             mode = 1252 # ANSI - Latan 1, default for US installs of MS products
@@ -166,7 +167,7 @@ module Rex
           return string
         when 'uhwtfms-half' # suggested name from HD :P
           load_codepage()
-          string = ''
+          string = +''
           # overloading mode as codepage
           if mode == ''
             mode = 1252 # ANSI - Latan 1, default for US installs of MS products
@@ -229,7 +230,7 @@ module Rex
     def self.to_unescape(data, endian=ENDIAN_LITTLE, prefix='%%u')
       data << "\x41" if (data.length % 2 != 0)
       dptr = 0
-      buff = ''
+      buff = +''
       while (dptr < data.length)
         c1 = data[dptr,1].unpack("C*")[0]
         dptr += 1

@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 require 'ipaddr'
 require 'io/console'
 require 'bigdecimal'
@@ -149,7 +150,7 @@ class WrappedTable
   def to_csv
     sort_rows
 
-    str = ''
+    str = +''
     str << ( columns.join(",") + "\n" )
     rows.each { |row|
       next if is_hr(row) || !row_visible(row)
@@ -367,7 +368,7 @@ protected
     values_as_chunks = chunk_values(columns, optimal_widths)
     result = chunks_to_s(values_as_chunks, optimal_widths)
 
-    barline = ""
+    barline = +""
     columns.each.with_index do |_column, idx|
       bar_width = display_width(values_as_chunks[idx].first)
       column_width = optimal_widths[idx]
@@ -419,7 +420,7 @@ protected
   # @param [Hash<String, String>] color_state tracks current color/formatting codes within table row
   # @returns [String] Color code string such as `%blu%grn'
   def color_code_string_for(color_state)
-    result = ''.dup
+    result = +''
     color_state.each do |_format, value|
       if value.is_a?(Array)
         result << value.uniq.join
@@ -498,7 +499,7 @@ protected
         if current_chunk.nil? && color_state.any?
           current_chunk = color_code_string_for(color_state)
         end
-        current_chunk ||= ''.dup
+        current_chunk ||= +''
 
         # Check if the remaining chars start with a color code such as %blu
         color_type_and_value = chars[char_index] == '%' ? find_color_type_and_value(chars[char_index..].join) : nil
@@ -544,10 +545,10 @@ protected
   end
 
   def chunks_to_s(values_as_chunks, optimal_widths)
-    result = ''
+    result = +''
 
     interleave(values_as_chunks).each do |row_chunks|
-      line = ""
+      line = +""
       row_chunks.each_with_index do |chunk, idx|
         column_width = optimal_widths[idx]
         chunk_length_with_padding = column_width + (chunk.to_s.length - display_width(chunk.to_s))

@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 require 'ipaddr'
 
 module Rex
@@ -162,7 +163,7 @@ class Table
   # Converts table contents to a csv
   #
   def to_csv
-    str = ''
+    str = +''
     str << ( columns.join(",") + "\n" )
     rows.each { |row|
       next if is_hr(row) || !row_visible(row)

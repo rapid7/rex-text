@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -52,7 +53,7 @@ module Rex
       "\x51","\x52","\x53","\x58","\x55","\x56","\x57","\x8c","\x49",
       "\xcd","\xce","\xcb","\xcf","\xcc","\xe1","\x70","\xdd","\xde",
       "\xdb","\xdc","\x8d","\x8e","\xdf"
-    ]
+    ].freeze
 
     #
     # This is the reverse of the above, converts EBCDIC -> ASCII
@@ -92,7 +93,7 @@ module Rex
       "\x5a","\xb2","\xd4","\xd6","\xd2","\xd3","\xd5","\x30","\x31",
       "\x32","\x33","\x34","\x35","\x36","\x37","\x38","\x39","\xb3",
       "\xdb","\xdc","\xd9","\xda","\x9f"
-    ]
+    ].freeze
 
     # The Iconv translation table. The Iconv gem is deprecated in favor of
     # String#encode, yet there is no encoding for EBCDIC. See #4525
@@ -121,7 +122,7 @@ module Rex
       nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
       nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
       nil, nil, nil, nil, nil
-    ]
+    ].freeze
 
     Iconv_ASCII  = [
       "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\a", "\b",
@@ -144,7 +145,7 @@ module Rex
       nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
       nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
       nil, nil, nil, nil, nil, nil, nil, nil, nil
-    ]
+    ].freeze
 
     # A native implementation of the ASCII to EBCDIC conversion table, since
     # EBCDIC isn't available to String#encode as of Ruby 2.1

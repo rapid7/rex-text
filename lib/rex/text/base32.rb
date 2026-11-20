@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+# frozen_string_literal: true
 module Rex
   module Text
     # We are re-opening the module to add these module methods.
@@ -46,7 +47,7 @@ module Rex
 
     def self.encode_base32(str)
       bytes = str.bytes
-      result = ''
+      result = +''
       size= 5
       while bytes.any? do
         bytes.each_slice(size) do |a|
@@ -71,7 +72,7 @@ module Rex
 
     def self.decode_base32(str)
       bytes = str.bytes
-      result = ''
+      result = +''
       size= 8
       while bytes.any? do
         bytes.each_slice(size) do |a|
